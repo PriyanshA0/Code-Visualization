@@ -1,139 +1,245 @@
-# Code-Visualization
+# talksy.code.visualizer
 
-A dark, cinematic code visualization platform built with Next.js. Write code, run it, and watch execution unfold step by step with highlighted lines, live variable state, and playback controls.
+A full-stack code visualization platform with authentication, execution quota control, and Polar billing hooks.
 
-## Preview
+This document is a complete handoff guide for teammates so they can continue development safely.
 
-| Landing page | Visualizer |
-| --- | --- |
-| ![Landing page](assets/image1.png) | ![Visualizer](assets/image.png) |
+## What Is Implemented
 
-## Features
+- Clerk authentication with protected visualizer and protected API routes.
+- JavaScript and Python code execution APIs.
+- Monthly free usage control: 2 execution attempts per authenticated user.
+- Upgrade/paywall behavior when free attempts are exhausted.
+- Polar checkout API integration (environment-driven).
+- Polar webhook endpoint that syncs subscription state to user plan.
+- MongoDB-backed snippets and usage/subscription records.
 
-- Step-by-step execution playback
-- Live line highlighting
-- Variables and state panel
-- Auto-play and manual stepping
-- JavaScript and Python execution
-- Snippet storage with MongoDB
-- Authentication with Clerk
+## Current Product Behavior
 
-## Tech Stack
+### Auth Flow
 
-- Next.js 16 App Router
-- React 19
-- TypeScript
-- Tailwind CSS
-- Monaco Editor
-- MongoDB + Mongoose
-- Clerk Authentication
-- Node.js VM for JavaScript execution
-- Python subprocess execution
+1. User opens landing page.
+2. User clicks Sign In or Sign Up.
+3. After successful auth, user is redirected to visualizer.
+4. If user is already signed in, Clerk may skip auth UI and redirect directly to visualizer. This is expected behavior.
 
-## Getting Started
+### Execution + Quota Flow
 
-### 1. Install dependencies
+1. Visualizer reads quota from `GET /api/usage/quota`.
+2. First-time session prompt shows: "You have only 2 free attempts".
+3. Execution calls:
+   - `POST /api/execute/javascript`
+   - `POST /api/execute/python`
+4. First 2 attempts in month return `200`.
+5. Further attempts return `402` with `requiresPayment: true` and upgrade info.
 
-```bash
-npm install
-```
+### Upgrade Flow
 
-### 2. Create environment variables
+1. Upgrade button calls `POST /api/billing/checkout`.
+2. If Polar is configured, API returns a Polar checkout URL and UI redirects user.
+3. If not configured, API returns `503` with clear setup message.
 
-Create a file named `.env.local` in the project root and add:
+## Environment Variables
+
+Create `.env.local` in project root:
 
 ```env
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_your_publishable_key
-CLERK_SECRET_KEY=sk_your_secret_key
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/visualizer
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/visualizer
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/code-visualizer
+
+# Mongo
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/talksy-code-visualizer
+# or
+MONGODB_URL=mongodb+srv://username:password@cluster.mongodb.net/talksy-code-visualizer
+
+# App URL for building absolute redirect URLs
+APP_BASE_URL=http://localhost:3000
+# optional alias
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Polar Billing
+POLAR_ACCESS_TOKEN=polar_access_token_here
+POLAR_PRODUCT_ID=polar_product_id_here
+# optional, defaults to https://api.polar.sh
+POLAR_API_BASE_URL=https://api.polar.sh
 ```
 
-## MongoDB Setup
+## Polar Integration Details
 
-Use MongoDB Atlas or a local MongoDB instance.
+### Checkout API
 
-1. Create a database named something like `code-visualizer`.
-2. Copy the connection string into `MONGODB_URI`.
-3. Make sure the IP access list allows your development machine.
-4. The app uses Mongoose models in `lib/models/` and the connection helper in `lib/mongodb.ts`.
+- File: `lib/actions/billing/provider.ts`
+- Route: `POST /api/billing/checkout`
 
-If your teammate is setting up the database, they only need the connection string and the same schema files already in the repo.
+Behavior:
 
-## Clerk Setup
+- Reads `POLAR_ACCESS_TOKEN` and `POLAR_PRODUCT_ID`.
+- Calls Polar API `POST /v1/checkouts`.
+- Sends product ID and metadata including Clerk user ID.
+- Returns checkout URL when successful.
+- Returns actionable message when billing is not configured.
 
-1. Create a Clerk application in the Clerk dashboard.
-2. Copy the publishable key and secret key into `.env.local`.
-3. Set the sign-in and sign-up URLs to match the routes in the app.
-4. Add Clerk middleware and protected routes if you want authenticated visualizer access only.
-5. Use the same Clerk application for both team members so user sessions behave consistently.
+### Webhook API
 
-If someone else on the team is continuing the work, they should verify these Clerk values first before debugging login issues.
+- Route: `POST /api/billing/webhook`
+- File: `app/api/billing/webhook/route.ts`
 
-## Run the App
+Behavior:
 
-```bash
-npm run dev
-```
+- Parses event payload.
+- Reads user mapping from `data.metadata.clerkUserId`.
+- Updates `UserSubscription` with paid/free state.
+- Sets:
+  - `planType` to `pro` for active paid events.
+  - `planType` to `free` for cancelled/failed events.
 
-Open:
+Important:
 
-```text
-http://localhost:3000
-```
+- Ensure Polar webhook includes metadata `clerkUserId`.
+- Point Polar webhook URL to your deployed `/api/billing/webhook` endpoint.
+
+## Data Models Used
+
+- `lib/models/UserSubscription.ts`
+  - `userId`
+  - `planType` (`free` or `pro`)
+  - `monthlyFreeLimit` (default 2)
+  - `monthlyFreeUsed`
+  - `resetAt`
+  - `isPaid`
+  - `paymentProvider`, `providerCustomerId`
+
+- `lib/models/CodeSnippet.ts`
+- `lib/models/ExecutionLog.ts`
+
+## Key API Routes
+
+- `POST /api/execute/javascript`
+- `POST /api/execute/python`
+- `GET /api/usage/quota`
+- `POST /api/billing/checkout`
+- `POST /api/billing/webhook`
+- `GET /api/snippets`
+- `POST /api/snippets`
+- `GET /api/snippets/[id]`
+- `DELETE /api/snippets/[id]`
+
+## Route Protection
+
+Protected by Clerk middleware in `proxy.ts`:
+
+- `/visualizer(.*)`
+- `/api/snippets(.*)`
+- `/api/execute(.*)`
+- `/api/usage/quota(.*)`
+- `/api/billing/checkout(.*)`
+
+Public routes include auth pages and webhook endpoint.
 
 ## Project Structure
 
 ```text
 app/
-	api/execute/      code execution endpoints
-	api/snippets/     snippet CRUD endpoints
-	(dashboard)/      authenticated app routes
-components/         UI and visualizer components
-lib/                execution, DB, and models
-assets/             screenshots for README and docs
+  (auth)/
+    sign-in/
+    sign-up/
+  (dashboard)/
+    visualizer/
+  api/
+    execute/
+    snippets/
+    usage/quota/
+    billing/checkout/
+    billing/webhook/
+components/
+  explorer-shell.tsx
+  CodeEditor.tsx
+  Visualizer.tsx
+  snippet-library.tsx
+lib/
+  actions/
+    codeExecution/quota.ts
+    billing/provider.ts
+  models/
+    UserSubscription.ts
+    CodeSnippet.ts
+    ExecutionLog.ts
+  mongodb.ts
+proxy.ts
 ```
 
-## How It Works
+## Local Development
 
-1. Paste or write code in the editor.
-2. Press Run.
-3. The backend executes the code and returns an execution trace.
-4. The visualizer highlights the current line and updates state.
-5. Use step controls or auto-play to review execution like an animation.
+```bash
+npm install
+npm run dev
+```
 
-## API Routes
+Open:
 
-- `POST /api/execute/javascript` - execute JavaScript and return a trace
-- `POST /api/execute/python` - execute Python and return output/error info
-- `GET /api/snippets` - list saved snippets
-- `POST /api/snippets` - save a snippet
-- `GET /api/snippets/[id]` - load one snippet
-- `DELETE /api/snippets/[id]` - remove one snippet
+- `http://localhost:3000`
 
-## For Team Members
+## Verification Checklist
 
-If a second member is joining the project, this is the order to follow:
+1. Open visualizer while signed out -> redirected to sign-in.
+2. Sign in -> visualizer opens.
+3. First-time prompt appears for free attempts.
+4. Run code twice -> success.
+5. Third run -> 402 + upgrade popup.
+6. Click upgrade:
+   - If Polar configured -> redirect to checkout.
+   - If not configured -> setup message returned.
 
-1. Pull the repository.
-2. Install dependencies with `npm install`.
-3. Add `.env.local` with Clerk and MongoDB values.
-4. Confirm MongoDB is reachable.
-5. Confirm Clerk sign-in/sign-up routes are working.
-6. Run `npm run dev` and open the visualizer.
+## Troubleshooting
 
-## Notes
+### `POST /api/execute/javascript` gives 500
 
-- The screenshots in `assets/` are used in this README.
-- The app is designed for a dark, centered visualization layout.
-- JavaScript execution uses a Node runtime, so the API route must stay on `runtime = "nodejs"`.
+Usually caused by Clerk middleware not matching execution routes.
+Check `proxy.ts` includes `/api/execute(.*)`.
 
-## Build
+### Sign In / Sign Up directly redirects to visualizer
+
+Expected when user is already logged in and single-session mode is enabled in Clerk.
+Use the user menu sign-out and retry.
+
+### Upgrade button does not redirect
+
+Check:
+
+- `POLAR_ACCESS_TOKEN`
+- `POLAR_PRODUCT_ID`
+- `APP_BASE_URL`
+
+And verify access token has permission for checkout creation.
+
+### Webhook not updating plan
+
+Check that Polar webhook payload includes `data.metadata.clerkUserId`.
+Without this mapping, server cannot update the correct user.
+
+## Team Handoff Workflow
+
+For next teammate:
+
+1. Pull latest branch.
+2. Set `.env.local` from the environment section above.
+3. Start app and validate auth + quota + billing.
+4. Use this README as source of truth before changing auth/billing logic.
+
+## Build and Run
 
 ```bash
 npm run build
 npm run start
 ```
+
+## Security Notes
+
+- Never commit `.env.local`.
+- Rotate Clerk and Polar keys if exposed.
+- Restrict webhook endpoint in production with provider-side signature verification.

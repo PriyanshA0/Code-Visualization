@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 const geist = Geist({
@@ -27,7 +28,9 @@ export default function RootLayout({
       lang="en"
       className={`${geist.variable} ${geistMono.variable} antialiased`}
     >
-      <body>{children}</body>
+      <body>
+        <ClerkProvider>{children}</ClerkProvider>
+      </body>
     </html>
   );
 }

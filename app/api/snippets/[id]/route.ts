@@ -1,18 +1,22 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { connectToDB } from "@/lib/mongodb";
 import CodeSnippet from "@/lib/models/CodeSnippet";
 import { deleteSnippet, getSnippet } from "@/lib/snippetStore";
 
-function getUserId(request: NextRequest) {
-  return request.headers.get("x-user-id") || "local-dev-user";
-}
+export const dynamic = "force-dynamic";
 
 export async function GET(
-  request: NextRequest,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = getUserId(request);
+    const { userId } = await auth();
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
     const connection = await connectToDB();
 
@@ -58,11 +62,16 @@ export async function GET(
 }
 
 export async function DELETE(
-  request: NextRequest,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = getUserId(request);
+    const { userId } = await auth();
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
     const connection = await connectToDB();
 

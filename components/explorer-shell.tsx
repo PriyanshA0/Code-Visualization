@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
 import CodeEditor from "@/components/CodeEditor";
 import ExecutionControls from "@/components/ExecutionControls";
 import Visualizer from "@/components/Visualizer";
 import { ExecutionTrace } from "@/lib/codeExecution/types";
+import { SnippetLibrary } from "@/components/snippet-library";
 
 const initialJavaScript = `async function bubbleSort(arr) {
   let n = arr.length;
@@ -23,14 +26,71 @@ const initialJavaScript = `async function bubbleSort(arr) {
 const data = [12, 24, 68, 42, 88, 15, 33, 57];
 console.log(bubbleSort(data));`;
 
+interface QuotaView {
+  planType: "free" | "pro";
+  freeLimit: number;
+  freeUsed: number;
+  freeRemaining: number;
+  resetAt: string;
+}
+
 export function ExplorerShell() {
   const [language, setLanguage] = useState<"javascript" | "python">("javascript");
   const [executionTrace, setExecutionTrace] = useState<ExecutionTrace | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const [lastCode, setLastCode] = useState(initialJavaScript);
+  const [code, setCode] = useState(initialJavaScript);
   const [mode, setMode] = useState<"step" | "auto">("step");
   const [speed, setSpeed] = useState(1.5);
+  const [quota, setQuota] = useState<QuotaView | null>(null);
+  const [paywallMessage, setPaywallMessage] = useState<string | null>(null);
+  const [showFreePrompt, setShowFreePrompt] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+
+  useEffect(() => {
+    const loadQuota = async () => {
+      try {
+        const response = await fetch("/api/usage/quota", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (response.status === 401) {
+          window.location.href = "/sign-in?redirect_url=%2Fvisualizer";
+          return;
+        }
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) {
+          return;
+        }
+
+        const nextQuota = payload?.quota as QuotaView | undefined;
+        if (!nextQuota) {
+          return;
+        }
+
+        setQuota(nextQuota);
+
+        if (nextQuota.planType === "free" && nextQuota.freeUsed === 0) {
+          const promptKey = "talksy-free-attempt-prompt-seen";
+          if (!window.sessionStorage.getItem(promptKey)) {
+            setShowFreePrompt(true);
+            window.sessionStorage.setItem(promptKey, "1");
+          }
+        }
+
+        if (nextQuota.planType === "free" && nextQuota.freeRemaining <= 0) {
+          setPaywallMessage("You used all free attempts for this month. Upgrade to continue execution.");
+          setShowUpgradePrompt(true);
+        }
+      } catch {
+        // Do not block visualizer on quota fetch failures.
+      }
+    };
+
+    loadQuota();
+  }, []);
 
   useEffect(() => {
     if (mode !== "auto" || !executionTrace || isRunning || executionTrace.totalSteps === 0) {
@@ -52,8 +112,10 @@ export function ExplorerShell() {
 
   const handleRun = async (code: string) => {
     setIsRunning(true);
-    setLastCode(code);
+    setCode(code);
     setCurrentStep(0);
+    setPaywallMessage(null);
+    setShowUpgradePrompt(false);
 
     try {
       const endpoint =
@@ -75,9 +137,34 @@ export function ExplorerShell() {
       }
 
       const trace = await response.json();
+
+      if (response.status === 401) {
+        window.location.href = "/sign-in?redirect_url=%2Fvisualizer";
+        return;
+      }
+
+      if (response.status === 402) {
+        setQuota(trace?.quota ?? null);
+        setPaywallMessage(
+          trace?.error ||
+            "You used all 2 free runs for this month. Upgrade to continue execution."
+        );
+        setShowUpgradePrompt(true);
+        setExecutionTrace({
+          steps: [],
+          output: "",
+          errors: trace?.error || "Free usage exhausted",
+          totalSteps: 0,
+          executionTime: 0,
+        });
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(trace?.error || "Failed to execute code");
       }
+
+      setQuota(trace?.quota ?? null);
 
       setExecutionTrace(trace);
       setCurrentStep(0);
@@ -94,13 +181,94 @@ export function ExplorerShell() {
     }
   };
 
+  const handleUpgrade = async () => {
+    try {
+      const response = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ returnUrl: "/visualizer" }),
+      });
+
+      const payload = await response.json();
+      if (payload?.checkoutUrl) {
+        window.location.href = payload.checkoutUrl;
+        return;
+      }
+
+      setPaywallMessage(payload?.message || "Checkout is not configured yet.");
+    } catch {
+      setPaywallMessage("Unable to start checkout right now. Please try again.");
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#060812] px-4 py-4 text-slate-100 lg:px-6 lg:py-6">
+      {showFreePrompt && quota && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-indigo-400/40 bg-[#10172a] p-6 text-slate-100 shadow-[0_20px_80px_rgba(0,0,0,0.5)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-indigo-300">Free Plan</p>
+            <h2 className="mt-3 text-xl font-bold">You have only 2 free attempts</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              Use your executions carefully. After free attempts are finished, you will need to upgrade.
+            </p>
+            <p className="mt-4 text-sm text-slate-200">
+              Remaining now: <span className="font-semibold">{quota.freeRemaining}</span>
+            </p>
+            <button
+              onClick={() => setShowFreePrompt(false)}
+              className="mt-5 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showUpgradePrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-amber-400/35 bg-[#1b1308] p-6 text-amber-100 shadow-[0_20px_80px_rgba(0,0,0,0.55)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-amber-300">Upgrade Required</p>
+            <h2 className="mt-3 text-xl font-bold text-amber-100">Free attempts are finished</h2>
+            <p className="mt-3 text-sm leading-6 text-amber-200/90">
+              {paywallMessage || "You have used all free attempts for this month."}
+            </p>
+            {quota && (
+              <p className="mt-3 text-sm text-amber-100/90">
+                Used: {quota.freeUsed}/{quota.freeLimit} · Next reset: {new Date(quota.resetAt).toLocaleDateString()}
+              </p>
+            )}
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={handleUpgrade}
+                className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110"
+              >
+                Upgrade with Polar
+              </button>
+              <button
+                onClick={() => setShowUpgradePrompt(false)}
+                className="rounded-xl border border-amber-200/30 bg-white/5 px-4 py-2 text-sm font-semibold text-amber-100 transition hover:bg-white/10"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <section className="mx-auto flex w-full max-w-[1700px] flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[#111827] px-4 py-3">
-          <h1 className="text-sm font-semibold tracking-[0.2em] text-slate-200 uppercase">
-            Code Visualization
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-sm font-semibold tracking-[0.2em] text-slate-200 uppercase">
+              Code Visualization
+            </h1>
+            <Link
+              href="/"
+              className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-white/10"
+            >
+              Home
+            </Link>
+            <UserButton afterSignOutUrl="/sign-in" />
+          </div>
           <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-[#141a2a] p-1 text-xs">
             <button
               className={`rounded-lg px-3 py-1.5 font-semibold transition ${
@@ -125,7 +293,7 @@ export function ExplorerShell() {
         <div className="grid min-h-[calc(100vh-130px)] gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
           <div className="min-h-0 rounded-[28px] border border-white/8 bg-[#121827] p-4 shadow-[0_20px_80px_rgba(0,0,0,0.35)]">
             <Visualizer
-              code={lastCode}
+              code={code}
               executionTrace={executionTrace}
               currentStepIndex={currentStep}
               speed={speed}
@@ -149,13 +317,45 @@ export function ExplorerShell() {
               />
             </div>
 
+            {quota && (
+              <div className="rounded-2xl border border-white/8 bg-[#141a2a] p-4 text-sm text-slate-200 shadow-[0_16px_60px_rgba(0,0,0,0.3)]">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Plan</span>
+                  <span className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs uppercase tracking-[0.2em]">
+                    {quota.planType}
+                  </span>
+                </div>
+                <p className="mt-3 text-slate-100">
+                  Free runs this month: {quota.freeUsed} / {quota.freeLimit}
+                </p>
+                <p className="mt-1 text-slate-300">Remaining: {quota.freeRemaining}</p>
+                <p className="mt-1 text-xs text-slate-400">
+                  Reset date: {new Date(quota.resetAt).toLocaleDateString()}
+                </p>
+              </div>
+            )}
+
+            {paywallMessage && (
+              <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-100 shadow-[0_16px_60px_rgba(0,0,0,0.3)]">
+                <p className="font-semibold">Upgrade required</p>
+                <p className="mt-1 leading-6">{paywallMessage}</p>
+                <button
+                  onClick={handleUpgrade}
+                  className="mt-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 text-xs font-semibold text-black transition hover:brightness-110"
+                >
+                  Upgrade with Polar
+                </button>
+              </div>
+            )}
+
             <div className="min-h-[380px] overflow-hidden rounded-[24px] border border-white/8 bg-[#121827] p-3 shadow-[0_16px_70px_rgba(0,0,0,0.35)]">
               <CodeEditor
                 language={language}
                 onLanguageChange={setLanguage}
                 onRun={handleRun}
+                value={code}
+                onChange={setCode}
                 isRunning={isRunning}
-                initialCode={lastCode}
               />
             </div>
 
@@ -165,6 +365,17 @@ export function ExplorerShell() {
               totalSteps={executionTrace?.totalSteps || 0}
               onStep={setCurrentStep}
               executionTrace={executionTrace}
+            />
+
+            <SnippetLibrary
+              code={code}
+              language={language}
+              onLoadSnippet={(snippet) => {
+                setCode(snippet.code);
+                setLanguage(snippet.language);
+                setCurrentStep(0);
+                setExecutionTrace(null);
+              }}
             />
           </aside>
         </div>

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI ?? process.env.MONGODB_URL;
 
 function isUsableMongoUri(uri?: string) {
   if (!uri) return false;
@@ -34,10 +34,7 @@ export async function connectToDB() {
 
   if (!cached.promise) {
     cached.promise = mongoose
-      .connect(MONGODB_URI!, {
-        dbName: "talksy_visualizer",
-        bufferCommands: false,
-      })
+      .connect(MONGODB_URI!, { bufferCommands: false })
       .then((mongoose) => mongoose)
       .catch(() => null);
   }

@@ -1,4 +1,5 @@
 import React from "react";
+import { AuthButtons } from "@/components/auth-buttons";
 
 const features = [
   {
@@ -103,17 +104,7 @@ export function LandingPage() {
               Benchmarks
             </a>
           </nav>
-          <div className="flex items-center gap-3 text-sm">
-            <a className="text-slate-300 transition hover:text-white" href="/visualizer">
-              Sign In
-            </a>
-            <a
-              className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-4 py-2 font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:brightness-110"
-              href="/visualizer"
-            >
-              Start Visualizing
-            </a>
-          </div>
+          <AuthButtons />
         </div>
       </header>
 
@@ -129,18 +120,7 @@ export function LandingPage() {
               Transform abstract logic into spatial reality.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <a
-                href="/visualizer"
-                className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_40px_rgba(99,102,241,0.35)] transition hover:scale-[1.02]"
-              >
-                Launch Editor
-              </a>
-              <a
-                href="/visualizer"
-                className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-slate-100 backdrop-blur transition hover:bg-white/10"
-              >
-                View Sandbox
-              </a>
+              <AuthButtons compact />
             </div>
           </div>
 
@@ -258,12 +238,7 @@ export function LandingPage() {
             Join developers who use talksy.code.visualizer to debug, learn, and document their architectural patterns.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <a href="/visualizer" className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30">
-              Get Started Free
-            </a>
-            <a href="/visualizer" className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-slate-100">
-              Book a Demo
-            </a>
+            <AuthButtons compact />
           </div>
         </div>
       </section>

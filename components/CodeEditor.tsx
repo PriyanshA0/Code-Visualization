@@ -1,40 +1,36 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import Editor from "@monaco-editor/react";
+import React from "react";
+import dynamic from "next/dynamic";
+
+const Editor = dynamic(() => import("@monaco-editor/react"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center text-sm text-slate-400">
+      Loading editor...
+    </div>
+  ),
+});
 
 interface CodeEditorProps {
   language: "javascript" | "python";
   onLanguageChange: (language: "javascript" | "python") => void;
   onRun: (code: string) => void;
+  value: string;
+  onChange: (code: string) => void;
   isRunning: boolean;
-  initialCode?: string;
 }
 
 export default function CodeEditor({
   language,
   onLanguageChange,
   onRun,
+  value,
+  onChange,
   isRunning,
-  initialCode,
 }: CodeEditorProps) {
-  const [code, setCode] = useState<string>(
-    initialCode ||
-      (language === "javascript"
-        ? "// Write your JavaScript code here\nconsole.log('Hello, World!');"
-        : "# Write your Python code here\nprint('Hello, World!')")
-  );
-
-  const editorRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (initialCode) {
-      setCode(initialCode);
-    }
-  }, [initialCode]);
-
   const handleRun = () => {
-    onRun(code);
+    onRun(value);
   };
 
   return (
@@ -76,8 +72,8 @@ export default function CodeEditor({
         <Editor
           height="100%"
           language={language === "javascript" ? "javascript" : "python"}
-          value={code}
-          onChange={(value) => setCode(value || "")}
+          value={value}
+          onChange={(nextCode) => onChange(nextCode || "")}
           theme="vs-dark"
           options={{
             minimap: { enabled: false },
@@ -89,9 +85,6 @@ export default function CodeEditor({
             renderLineHighlight: "all",
             fontLigatures: true,
             bracketPairColorization: { enabled: true },
-          }}
-          onMount={(editor) => {
-            editorRef.current = editor;
           }}
         />
       </div>

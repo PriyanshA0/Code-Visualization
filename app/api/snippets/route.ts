@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { connectToDB } from "@/lib/mongodb";
 import CodeSnippet from "@/lib/models/CodeSnippet";
 import { createSnippet, listSnippets } from "@/lib/snippetStore";
 import { z } from "zod";
+
+export const dynamic = "force-dynamic";
 
 const CreateSnippetSchema = z.object({
   title: z.string().min(1).max(255),
@@ -12,14 +15,13 @@ const CreateSnippetSchema = z.object({
   isPublic: z.boolean().optional(),
 });
 
-function getUserId(request: NextRequest) {
-  return request.headers.get("x-user-id") || "local-dev-user";
-}
-
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const userId = getUserId(request);
-    const connection = await connectToDB();
+    const [{ userId }, connection] = await Promise.all([auth(), connectToDB()]);
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     if (!connection) {
       return NextResponse.json(listSnippets(userId));
@@ -37,14 +39,19 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const userId = getUserId(request);
+    const [{ userId }, body, connection] = await Promise.all([
+      auth(),
+      request.json(),
+      connectToDB(),
+    ]);
 
-    const body = await request.json();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const validatedData = CreateSnippetSchema.parse(body);
-
-    const connection = await connectToDB();
 
     if (!connection) {
       return NextResponse.json(createSnippet(userId, validatedData), {
