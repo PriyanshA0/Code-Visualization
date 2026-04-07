@@ -241,3 +241,160 @@ input[type="range"] {
     transform: translateY(0) translateX(-50%) scale(1);
   }
 }
+
+@keyframes hero-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.01);
+  }
+}
+
+@keyframes hero-line-grow {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.72);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes hero-node-pulse {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 0 0 rgba(99, 102, 241, 0);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.04);
+    box-shadow: 0 0 24px rgba(99, 102, 241, 0.18);
+  }
+}
+
+@keyframes hero-glow-drift {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    opacity: 0.75;
+    transform: translate3d(0, -6px, 0);
+  }
+}
+
+.hero-fade-up {
+  animation: hero-fade-up 700ms ease-out both;
+}
+
+.hero-float {
+  animation: hero-float 5.5s ease-in-out infinite;
+}
+
+.hero-code-line {
+  animation: hero-fade-up 620ms ease-out both;
+}
+
+.hero-line-draw {
+  animation: hero-line-grow 900ms ease-out both;
+  transform-origin: center;
+}
+
+.hero-node-pulse {
+  animation: hero-node-pulse 4.8s ease-in-out infinite;
+}
+
+.hero-glow-drift {
+  animation: hero-glow-drift 6s ease-in-out infinite;
+}
+
+@keyframes typing-reveal {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--typing-width, 100%);
+  }
+}
+
+@keyframes typing-caret-blink {
+  0%,
+  100% {
+    border-color: rgba(99, 102, 241, 0.9);
+  }
+  50% {
+    border-color: transparent;
+  }
+}
+
+.typing-line {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 0;
+  border-right: 2px solid rgba(99, 102, 241, 0.9);
+  animation: typing-reveal 1.2s steps(28, end) forwards, typing-caret-blink 850ms step-end infinite;
+}
+
+.typing-line-slow {
+  animation-duration: 1.6s, 850ms;
+}
+
+.typing-line-med {
+  animation-duration: 1.3s, 850ms;
+}
+
+.typing-line-fast {
+  animation-duration: 1.05s, 850ms;
+}
+
+.typing-line-wide {
+  --typing-width: 100%;
+}
+
+.typing-line-small {
+  --typing-width: 92%;
+}
+
+.typing-line-short {
+  --typing-width: 78%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-fade-up,
+  .hero-float,
+  .hero-code-line,
+  .hero-line-draw,
+  .hero-node-pulse,
+  .hero-glow-drift,
+  .typing-line,
+  .line-focus-active,
+  .var-card-updated,
+  .line-caret-live,
+  .object-box-move,
+  .flow-trace,
+  .object-node-moved,
+  .object-node-changed,
+  .object-node-new,
+  .node-flow-active,
+  .flow-branch-label {
+    animation: none !important;
+  }
+}

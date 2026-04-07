@@ -140,16 +140,22 @@ export function LandingPage() {
       <section className="relative overflow-hidden border-b border-white/6">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(99,102,241,0.2),_transparent_34%),linear-gradient(180deg,#020616_0%,#040b1d_75%,#050910_100%)]" />
         <div className="relative mx-auto max-w-[1440px] px-4 pb-10 pt-14 sm:px-6 sm:pb-12 sm:pt-20 lg:px-8 lg:pb-16 lg:pt-24">
-          <div className="mx-auto max-w-4xl text-center">
+          <div className="mx-auto max-w-4xl text-center hero-fade-up" style={{ animationDelay: "40ms" }}>
             <h1 className="text-balance text-4xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl">
               See your code
               <br className="hidden sm:block" />
               <span className="sm:pl-2">come to life</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-3xl text-base leading-7 text-slate-300 sm:text-xl sm:leading-9">
+            <p
+              className="typing-line typing-line-short mx-auto mt-4 max-w-full text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-200 sm:mt-5 sm:text-[12px]"
+              style={{ animationDelay: "140ms", ["--typing-width" as never]: "26ch" }}
+            >
+              run code • inspect state • trace flow
+            </p>
+            <p className="mx-auto mt-5 max-w-3xl text-base leading-7 text-slate-300 sm:text-xl sm:leading-9 hero-fade-up" style={{ animationDelay: "200ms" }}>
               Visualize algorithms step by step with real-time animations. Transform abstract logic into spatial reality.
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 hero-fade-up" style={{ animationDelay: "280ms" }}>
               <a
                 href="/visualizer"
                 className="rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 px-8 py-3 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(99,102,241,0.4)] transition hover:brightness-110"
@@ -166,39 +172,39 @@ export function LandingPage() {
           </div>
 
           <div className="mt-10 grid gap-5 lg:grid-cols-2">
-            <div className="rounded-2xl border border-white/8 bg-[#111a31]/70 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.42)]">
+            <div className="hero-float rounded-2xl border border-white/8 bg-[#111a31]/70 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.42)]" style={{ animationDelay: "300ms" }}>
               <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold tracking-[0.28em] text-slate-500">
                 <span className="h-2.5 w-2.5 rounded-full bg-slate-500" />
                 BINARY_SEARCH.PY
               </div>
               <div className="rounded-xl border border-white/6 bg-[#050b1b] p-4 font-mono text-[11px] leading-6 text-slate-300">
-                <p><span className="text-sky-300">def</span> <span className="text-amber-300">binary_search</span>(arr, target):</p>
-                <p>&nbsp;&nbsp;low = 0</p>
-                <p>&nbsp;&nbsp;high = len(arr) - 1</p>
-                <p className="rounded bg-white/5 pl-3 text-white">&nbsp;&nbsp;while low &lt;= high:</p>
-                <p>&nbsp;&nbsp;&nbsp;&nbsp;mid = (low + high) // 2</p>
-                <p>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-pink-300">if</span> arr[mid] == target:</p>
-                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return mid</p>
-                <p>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-pink-300">elif</span> arr[mid] &gt; target:</p>
-                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;high = mid - 1</p>
-                <p>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-pink-300">else</span>:</p>
-                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;low = mid + 1</p>
-                <p>&nbsp;&nbsp;return -1</p>
+                <p className="hero-code-line whitespace-pre" style={{ animationDelay: "70ms" }}><span className="text-sky-300">def</span> <span className="text-amber-300">binary_search</span>(arr, target):</p>
+                <p className="hero-code-line whitespace-pre" style={{ animationDelay: "130ms" }}>&nbsp;&nbsp;low = 0</p>
+                <p className="hero-code-line whitespace-pre" style={{ animationDelay: "190ms" }}>&nbsp;&nbsp;high = len(arr) - 1</p>
+                <p className="hero-code-line whitespace-pre rounded bg-white/5 pl-3 text-white" style={{ animationDelay: "250ms" }}>&nbsp;&nbsp;while low &lt;= high:</p>
+                <p className="hero-code-line whitespace-pre" style={{ animationDelay: "320ms" }}>&nbsp;&nbsp;&nbsp;&nbsp;mid = (low + high) // 2</p>
+                <p className="hero-code-line whitespace-pre" style={{ animationDelay: "390ms" }}>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-pink-300">if</span> arr[mid] == target:</p>
+                <p className="hero-code-line whitespace-pre" style={{ animationDelay: "460ms" }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return mid</p>
+                <p className="hero-code-line whitespace-pre" style={{ animationDelay: "530ms" }}>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-pink-300">elif</span> arr[mid] &gt; target:</p>
+                <p className="hero-code-line whitespace-pre" style={{ animationDelay: "600ms" }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;high = mid - 1</p>
+                <p className="hero-code-line whitespace-pre" style={{ animationDelay: "670ms" }}>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-pink-300">else</span>:</p>
+                <p className="hero-code-line whitespace-pre" style={{ animationDelay: "740ms" }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;low = mid + 1</p>
+                <p className="hero-code-line whitespace-pre" style={{ animationDelay: "810ms" }}>&nbsp;&nbsp;return -1</p>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/8 bg-[#10182e]/70 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.42)]">
-              <div className="relative flex min-h-[310px] items-center justify-center overflow-hidden rounded-xl border border-white/6 bg-[radial-gradient(circle,_rgba(255,255,255,0.03)_0%,_transparent_75%)] p-6">
+            <div className="hero-float rounded-2xl border border-white/8 bg-[#10182e]/70 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.42)]" style={{ animationDelay: "420ms" }}>
+              <div className="hero-glow-drift relative flex min-h-[310px] items-center justify-center overflow-hidden rounded-xl border border-white/6 bg-[radial-gradient(circle,_rgba(255,255,255,0.03)_0%,_transparent_75%)] p-6">
                 <div className="relative h-[220px] w-full max-w-[420px]">
-                  <div className="absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-indigo-400 text-lg font-extrabold text-[#101427] shadow-[0_10px_30px_rgba(99,102,241,0.45)]">
+                  <div className="hero-node-pulse absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-indigo-400 text-lg font-extrabold text-[#101427] shadow-[0_10px_30px_rgba(99,102,241,0.45)]" style={{ animationDelay: "0ms" }}>
                     42
                   </div>
-                  <div className="absolute left-[28%] top-[36%] h-px w-[24%] origin-right rotate-[34deg] bg-indigo-300/70" />
-                  <div className="absolute right-[28%] top-[36%] h-px w-[24%] origin-left -rotate-[34deg] bg-indigo-300/70" />
-                  <div className="absolute left-[16%] top-[56%] flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-white/10 text-sm text-slate-200">
+                  <div className="hero-line-draw absolute left-[28%] top-[36%] h-px w-[24%] origin-right rotate-[34deg] bg-indigo-300/70" style={{ animationDelay: "120ms" }} />
+                  <div className="hero-line-draw absolute right-[28%] top-[36%] h-px w-[24%] origin-left -rotate-[34deg] bg-indigo-300/70" style={{ animationDelay: "160ms" }} />
+                  <div className="hero-node-pulse absolute left-[16%] top-[56%] flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-white/10 text-sm text-slate-200" style={{ animationDelay: "220ms" }}>
                     21
                   </div>
-                  <div className="absolute right-[16%] top-[56%] flex h-11 w-11 items-center justify-center rounded-full border border-indigo-300/70 bg-[#0b1224] text-sm text-slate-100">
+                  <div className="hero-node-pulse absolute right-[16%] top-[56%] flex h-11 w-11 items-center justify-center rounded-full border border-indigo-300/70 bg-[#0b1224] text-sm text-slate-100" style={{ animationDelay: "380ms" }}>
                     64
                   </div>
                 </div>
