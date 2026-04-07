@@ -7,10 +7,13 @@ export interface IUserSubscription extends Document {
   planType: PlanType;
   monthlyFreeLimit: number;
   monthlyFreeUsed: number;
+  paidCreditsTotal: number;
+  paidCreditsRemaining: number;
   resetAt: Date;
   isPaid: boolean;
   paymentProvider?: "polar";
   providerCustomerId?: string;
+  lastProcessedPolarEventId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +41,16 @@ const UserSubscriptionSchema = new Schema<IUserSubscription>(
       default: 0,
       min: 0,
     },
+    paidCreditsTotal: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    paidCreditsRemaining: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     resetAt: {
       type: Date,
       required: true,
@@ -51,6 +64,7 @@ const UserSubscriptionSchema = new Schema<IUserSubscription>(
       enum: ["polar"],
     },
     providerCustomerId: String,
+    lastProcessedPolarEventId: String,
   },
   { timestamps: true }
 );

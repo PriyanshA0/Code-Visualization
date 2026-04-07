@@ -76,9 +76,10 @@ function braceDelta(line: string) {
 
 function classifyKind(t: string): FlowKind {
   if (/^async\s+function|^function\s+\w/.test(t)) return "function";
+  if (/^(public|private|protected)?\s*(static\s+)?[\w\[\]<>?,\s]+\s+\w+\s*\([^)]*\)\s*\{?$/.test(t)) return "function";
   if (/^return\b/.test(t)) return "return";
-  if (/^(if|else\s*if|else|switch|for|while|do)\b/.test(t)) return "logic";
-  if (/^(console\.|print\b|alert\b)/.test(t)) return "io";
+  if (/^(if|else\s*if|else|switch|for|while|do|try|catch|finally)\b/.test(t)) return "logic";
+  if (/^(console\.|print\b|alert\b|System\.out\.print\w*)/.test(t)) return "io";
   if (/^(let|const|var)\s+/.test(t) || /\b\w+\s*=/.test(t)) return "assign";
   if (/\w+\s*\(/.test(t)) return "call";
   return "assign";
@@ -98,14 +99,18 @@ function labelFor(t: string): string {
   }
 
   if (/^return\b/.test(t)) return `return ${t.replace(/^return\s*/, "").replace(/;$/, "").slice(0, 22)}`;
-  if (/^(console\.|print\b|alert\b)/.test(t)) return "print output";
+  if (/^(console\.|print\b|alert\b|System\.out\.print\w*)/.test(t)) return "print output";
 
-  if (/^(if|else\s*if|for|while)\b/.test(t)) {
+  if (/^(if|else\s*if|for|while|try|catch|finally)\b/.test(t)) {
     const kw = t.match(/^(\w+(?:\s+\w+)?)/)?.[1] ?? "";
     const cond = t.match(/\(([^)]{0,22})\)/)?.[1] ?? "";
     return `${kw} (${cond})`;
   }
   if (/^else\b/.test(t)) return "else";
+  if (/^(public|private|protected)?\s*(static\s+)?[\w\[\]<>?,\s]+\s+\w+\s*\([^)]*\)/.test(t)) {
+    const method = t.match(/\b([A-Za-z_][\w]*)\s*\(/)?.[1] ?? "method";
+    return `method ${method}()`;
+  }
   const call = t.match(/^(\w+)\s*\(/);
   if (call) return `call ${call[1]}()`;
   return t.slice(0, 26);

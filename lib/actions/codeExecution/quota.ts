@@ -2,11 +2,14 @@ import { connectToDB } from "@/lib/mongodb";
 import UserSubscription, { PlanType } from "@/lib/models/UserSubscription";
 
 const DEFAULT_FREE_LIMIT = 2;
+const PURCHASE_CREDIT_PACK = 10;
 
 type MemoryQuota = {
   planType: PlanType;
   monthlyFreeLimit: number;
   monthlyFreeUsed: number;
+  paidCreditsTotal: number;
+  paidCreditsRemaining: number;
   resetAt: Date;
   isPaid: boolean;
 };
@@ -17,9 +20,12 @@ export interface QuotaDecision {
   allowed: boolean;
   requiresPayment: boolean;
   planType: PlanType;
+  quotaMode: "free" | "paid";
   freeLimit: number;
   freeUsed: number;
   freeRemaining: number;
+  paidCreditsTotal: number;
+  paidCreditsRemaining: number;
   resetAt: string;
 }
 
@@ -29,20 +35,27 @@ function getNextResetDate(from = new Date()) {
 
 function toDecision(input: {
   allowed: boolean;
-  planType: PlanType;
   monthlyFreeLimit: number;
   monthlyFreeUsed: number;
+  paidCreditsTotal: number;
+  paidCreditsRemaining: number;
   resetAt: Date;
 }) {
   const freeRemaining = Math.max(input.monthlyFreeLimit - input.monthlyFreeUsed, 0);
+  const paidCreditsTotal = Math.max(input.paidCreditsTotal, 0);
+  const paidCreditsRemaining = Math.max(input.paidCreditsRemaining, 0);
+  const quotaMode = paidCreditsTotal > 0 ? "paid" : "free";
 
   return {
     allowed: input.allowed,
     requiresPayment: !input.allowed,
-    planType: input.planType,
+    planType: quotaMode === "paid" ? "pro" : "free",
+    quotaMode,
     freeLimit: input.monthlyFreeLimit,
     freeUsed: input.monthlyFreeUsed,
     freeRemaining,
+    paidCreditsTotal,
+    paidCreditsRemaining,
     resetAt: input.resetAt.toISOString(),
   } satisfies QuotaDecision;
 }
@@ -62,6 +75,8 @@ function getOrCreateMemoryQuota(userId: string) {
       planType: "free",
       monthlyFreeLimit: DEFAULT_FREE_LIMIT,
       monthlyFreeUsed: 0,
+      paidCreditsTotal: 0,
+      paidCreditsRemaining: 0,
       resetAt: getNextResetDate(),
       isPaid: false,
     };
@@ -74,29 +89,65 @@ function getOrCreateMemoryQuota(userId: string) {
 
 function decisionFromMemory(userId: string, consumeAttempt: boolean) {
   const fallback = getOrCreateMemoryQuota(userId);
-  const isUnlimited = fallback.planType !== "free" || fallback.isPaid;
+  const legacyPaidWithoutCredits =
+    (fallback.planType !== "free" || fallback.isPaid) && fallback.paidCreditsTotal === 0;
 
-  if (!isUnlimited) {
-    if (fallback.monthlyFreeUsed >= fallback.monthlyFreeLimit) {
+  if (legacyPaidWithoutCredits) {
+    fallback.planType = "pro";
+    fallback.isPaid = true;
+    fallback.paidCreditsTotal = PURCHASE_CREDIT_PACK;
+    fallback.paidCreditsRemaining = Math.max(fallback.paidCreditsRemaining, PURCHASE_CREDIT_PACK);
+  }
+
+  const hasPaidWallet = fallback.paidCreditsTotal > 0;
+
+  if (hasPaidWallet) {
+    if (fallback.paidCreditsRemaining <= 0) {
       return toDecision({
         allowed: false,
-        planType: fallback.planType,
         monthlyFreeLimit: fallback.monthlyFreeLimit,
         monthlyFreeUsed: fallback.monthlyFreeUsed,
+        paidCreditsTotal: fallback.paidCreditsTotal,
+        paidCreditsRemaining: fallback.paidCreditsRemaining,
         resetAt: fallback.resetAt,
       });
     }
 
     if (consumeAttempt) {
-      fallback.monthlyFreeUsed += 1;
+      fallback.paidCreditsRemaining -= 1;
     }
+
+    return toDecision({
+      allowed: true,
+      monthlyFreeLimit: fallback.monthlyFreeLimit,
+      monthlyFreeUsed: fallback.monthlyFreeUsed,
+      paidCreditsTotal: fallback.paidCreditsTotal,
+      paidCreditsRemaining: fallback.paidCreditsRemaining,
+      resetAt: fallback.resetAt,
+    });
+  }
+
+  if (fallback.monthlyFreeUsed >= fallback.monthlyFreeLimit) {
+    return toDecision({
+      allowed: false,
+      monthlyFreeLimit: fallback.monthlyFreeLimit,
+      monthlyFreeUsed: fallback.monthlyFreeUsed,
+      paidCreditsTotal: fallback.paidCreditsTotal,
+      paidCreditsRemaining: fallback.paidCreditsRemaining,
+      resetAt: fallback.resetAt,
+    });
+  }
+
+  if (consumeAttempt) {
+    fallback.monthlyFreeUsed += 1;
   }
 
   return toDecision({
     allowed: true,
-    planType: fallback.planType,
     monthlyFreeLimit: fallback.monthlyFreeLimit,
     monthlyFreeUsed: fallback.monthlyFreeUsed,
+    paidCreditsTotal: fallback.paidCreditsTotal,
+    paidCreditsRemaining: fallback.paidCreditsRemaining,
     resetAt: fallback.resetAt,
   });
 }
@@ -111,6 +162,8 @@ async function getOrCreateDbQuota(userId: string) {
       planType: "free",
       monthlyFreeLimit: DEFAULT_FREE_LIMIT,
       monthlyFreeUsed: 0,
+      paidCreditsTotal: 0,
+      paidCreditsRemaining: 0,
       resetAt: getNextResetDate(now),
       isPaid: false,
     });
@@ -146,7 +199,29 @@ async function evaluateExecutionQuota(
 
   try {
     const record = await getOrCreateDbQuota(userId);
-    const isUnlimited = record.planType !== "free" || record.isPaid;
+
+    let paidCreditsTotal = Math.max(record.paidCreditsTotal ?? 0, 0);
+    let paidCreditsRemaining = Math.max(record.paidCreditsRemaining ?? 0, 0);
+    const isLegacyPaidWithoutCredits =
+      (record.planType !== "free" || record.isPaid) && paidCreditsTotal === 0;
+
+    if (isLegacyPaidWithoutCredits) {
+      paidCreditsTotal = PURCHASE_CREDIT_PACK;
+      paidCreditsRemaining = Math.max(paidCreditsRemaining, PURCHASE_CREDIT_PACK);
+      await UserSubscription.updateOne(
+        { _id: record._id },
+        {
+          $set: {
+            planType: "pro",
+            isPaid: true,
+            paidCreditsTotal,
+            paidCreditsRemaining,
+          },
+        }
+      );
+    }
+
+    const hasPaidWallet = paidCreditsTotal > 0;
     const freeLimit = Math.max(record.monthlyFreeLimit ?? DEFAULT_FREE_LIMIT, 0);
     const freeUsed = Math.max(record.monthlyFreeUsed ?? 0, 0);
     const resetAt =
@@ -154,17 +229,63 @@ async function evaluateExecutionQuota(
         ? record.resetAt
         : getNextResetDate();
 
-    if (!isUnlimited && freeUsed >= freeLimit) {
+    if (hasPaidWallet) {
+      if (paidCreditsRemaining <= 0) {
+        return toDecision({
+          allowed: false,
+          monthlyFreeLimit: freeLimit,
+          monthlyFreeUsed: freeUsed,
+          paidCreditsTotal,
+          paidCreditsRemaining,
+          resetAt,
+        });
+      }
+
+      if (consumeAttempt) {
+        const decrementResult = await UserSubscription.updateOne(
+          { _id: record._id, paidCreditsRemaining: { $gt: 0 } },
+          {
+            $set: { planType: "pro", isPaid: true, resetAt },
+            $inc: { paidCreditsRemaining: -1 },
+          }
+        );
+
+        if (decrementResult.modifiedCount === 0) {
+          return toDecision({
+            allowed: false,
+            monthlyFreeLimit: freeLimit,
+            monthlyFreeUsed: freeUsed,
+            paidCreditsTotal,
+            paidCreditsRemaining: 0,
+            resetAt,
+          });
+        }
+
+        paidCreditsRemaining -= 1;
+      }
+
       return toDecision({
-        allowed: false,
-        planType: record.planType,
         monthlyFreeLimit: freeLimit,
         monthlyFreeUsed: freeUsed,
+        paidCreditsTotal,
+        paidCreditsRemaining,
+        allowed: true,
         resetAt,
       });
     }
 
-    if (!isUnlimited && consumeAttempt) {
+    if (freeUsed >= freeLimit) {
+      return toDecision({
+        allowed: false,
+        monthlyFreeLimit: freeLimit,
+        monthlyFreeUsed: freeUsed,
+        paidCreditsTotal,
+        paidCreditsRemaining,
+        resetAt,
+      });
+    }
+
+    if (consumeAttempt) {
       await UserSubscription.updateOne(
         { _id: record._id },
         {
@@ -178,7 +299,7 @@ async function evaluateExecutionQuota(
       record.resetAt = resetAt;
     }
 
-    if (!isUnlimited && !consumeAttempt) {
+    if (!consumeAttempt) {
       record.monthlyFreeUsed = freeUsed;
       record.monthlyFreeLimit = freeLimit;
       record.resetAt = resetAt;
@@ -186,9 +307,10 @@ async function evaluateExecutionQuota(
 
     return toDecision({
       allowed: true,
-      planType: record.planType,
       monthlyFreeLimit: record.monthlyFreeLimit,
       monthlyFreeUsed: record.monthlyFreeUsed,
+      paidCreditsTotal,
+      paidCreditsRemaining,
       resetAt: record.resetAt,
     });
   } catch (error) {

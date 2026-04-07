@@ -9,6 +9,7 @@ This document is a complete handoff guide for teammates so they can continue dev
 - Clerk authentication with protected visualizer and protected API routes.
 - JavaScript and Python code execution APIs.
 - Monthly free usage control: 2 execution attempts per authenticated user.
+- One-time paid credit pack: each successful purchase grants 10 execution credits.
 - Upgrade/paywall behavior when free attempts are exhausted.
 - Polar checkout API integration (environment-driven).
 - Polar webhook endpoint that syncs subscription state to user plan.
@@ -31,7 +32,9 @@ This document is a complete handoff guide for teammates so they can continue dev
    - `POST /api/execute/javascript`
    - `POST /api/execute/python`
 4. First 2 attempts in month return `200`.
-5. Further attempts return `402` with `requiresPayment: true` and upgrade info.
+5. After free attempts are exhausted, purchase grants 10 paid credits.
+6. Each execution consumes exactly 1 paid credit.
+7. When paid credits reach 0, API returns `402` with `requiresPayment: true`.
 
 ### Upgrade Flow
 
@@ -65,6 +68,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 # Polar Billing
 POLAR_ACCESS_TOKEN=polar_access_token_here
 POLAR_PRODUCT_ID=polar_product_id_here
+POLAR_WEBHOOK_SECRET=whsec_...
 # optional, defaults to https://api.polar.sh
 POLAR_API_BASE_URL=https://api.polar.sh
 ```
@@ -92,11 +96,10 @@ Behavior:
 Behavior:
 
 - Parses event payload.
+- Verifies webhook signature using `POLAR_WEBHOOK_SECRET`.
 - Reads user mapping from `data.metadata.clerkUserId`.
-- Updates `UserSubscription` with paid/free state.
-- Sets:
-  - `planType` to `pro` for active paid events.
-  - `planType` to `free` for cancelled/failed events.
+- On successful paid order/checkout events, adds `+10` credits to the user.
+- Stores last processed event id to avoid duplicate credit grants.
 
 Important:
 
@@ -110,6 +113,8 @@ Important:
   - `planType` (`free` or `pro`)
   - `monthlyFreeLimit` (default 2)
   - `monthlyFreeUsed`
+  - `paidCreditsTotal`
+  - `paidCreditsRemaining`
   - `resetAt`
   - `isPaid`
   - `paymentProvider`, `providerCustomerId`

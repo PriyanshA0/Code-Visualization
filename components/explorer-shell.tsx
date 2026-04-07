@@ -26,11 +26,25 @@ const initialJavaScript = `async function bubbleSort(arr) {
 const data = [12, 24, 68, 42, 88, 15, 33, 57];
 console.log(bubbleSort(data));`;
 
+const initialPython = `def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+    return arr
+
+data = [12, 24, 68, 42, 88, 15, 33, 57]
+print(bubble_sort(data))`;
+
 interface QuotaView {
   planType: "free" | "pro";
+  quotaMode: "free" | "paid";
   freeLimit: number;
   freeUsed: number;
   freeRemaining: number;
+  paidCreditsTotal: number;
+  paidCreditsRemaining: number;
   resetAt: string;
 }
 
@@ -77,6 +91,11 @@ export function ExplorerShell() {
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const editorTitle = deriveEditorTitle(code, language);
 
+  const starterCodeByLanguage: Record<typeof language, string> = {
+    javascript: initialJavaScript,
+    python: initialPython,
+  };
+
   useEffect(() => {
     const loadQuota = async () => {
       try {
@@ -102,7 +121,7 @@ export function ExplorerShell() {
 
         setQuota(nextQuota);
 
-        if (nextQuota.planType === "free" && nextQuota.freeUsed === 0) {
+        if (nextQuota.quotaMode === "free" && nextQuota.freeUsed === 0) {
           const promptKey = "talksy-free-attempt-prompt-seen";
           if (!window.sessionStorage.getItem(promptKey)) {
             setShowFreePrompt(true);
@@ -110,8 +129,13 @@ export function ExplorerShell() {
           }
         }
 
-        if (nextQuota.planType === "free" && nextQuota.freeRemaining <= 0) {
-          setPaywallMessage("You used all free attempts for this month. Upgrade to continue execution.");
+        if (nextQuota.quotaMode === "free" && nextQuota.freeRemaining <= 0) {
+          setPaywallMessage("You used all free attempts for this month. Purchase 10 credits to continue execution.");
+          setShowUpgradePrompt(true);
+        }
+
+        if (nextQuota.quotaMode === "paid" && nextQuota.paidCreditsRemaining <= 0) {
+          setPaywallMessage("You used all purchased credits. Buy 10 more credits to continue execution.");
           setShowUpgradePrompt(true);
         }
       } catch {
@@ -121,6 +145,14 @@ export function ExplorerShell() {
 
     loadQuota();
   }, []);
+
+  const handleLanguageChange = (nextLanguage: typeof language) => {
+    setLanguage(nextLanguage);
+    setCode(starterCodeByLanguage[nextLanguage]);
+    setExecutionTrace(null);
+    setCurrentStep(0);
+    setPaywallMessage(null);
+  };
 
   useEffect(() => {
     if (mode !== "auto" || !executionTrace || isRunning || executionTrace.totalSteps === 0) {
@@ -149,7 +181,9 @@ export function ExplorerShell() {
 
     try {
       const endpoint =
-        language === "javascript" ? "/api/execute/javascript" : "/api/execute/python";
+        language === "javascript"
+          ? "/api/execute/javascript"
+          : "/api/execute/python";
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -177,7 +211,7 @@ export function ExplorerShell() {
         setQuota(trace?.quota ?? null);
         setPaywallMessage(
           trace?.error ||
-            "You used all 2 free runs for this month. Upgrade to continue execution."
+            "No attempts remaining. Buy 10 credits to continue execution."
         );
         setShowUpgradePrompt(true);
         setExecutionTrace({
@@ -216,7 +250,7 @@ export function ExplorerShell() {
       const response = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ returnUrl: "/visualizer" }),
+        body: JSON.stringify({ returnUrl: "/billing-success" }),
       });
 
       const payload = await response.json();
@@ -258,13 +292,15 @@ export function ExplorerShell() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4">
           <div className="w-full max-w-md rounded-2xl border border-amber-400/35 bg-[#1b1308] p-6 text-amber-100 shadow-[0_20px_80px_rgba(0,0,0,0.55)]">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-amber-300">Upgrade Required</p>
-            <h2 className="mt-3 text-xl font-bold text-amber-100">Free attempts are finished</h2>
+            <h2 className="mt-3 text-xl font-bold text-amber-100">Execution attempts are finished</h2>
             <p className="mt-3 text-sm leading-6 text-amber-200/90">
-              {paywallMessage || "You have used all free attempts for this month."}
+              {paywallMessage || "You have no attempts left. Buy 10 more credits to continue."}
             </p>
             {quota && (
               <p className="mt-3 text-sm text-amber-100/90">
-                Used: {quota.freeUsed}/{quota.freeLimit} · Next reset: {new Date(quota.resetAt).toLocaleDateString()}
+                {quota.quotaMode === "paid"
+                  ? `Credits remaining: ${quota.paidCreditsRemaining}/${quota.paidCreditsTotal}`
+                  : `Used: ${quota.freeUsed}/${quota.freeLimit} · Next reset: ${new Date(quota.resetAt).toLocaleDateString()}`}
               </p>
             )}
             <div className="mt-5 flex gap-3">
@@ -354,16 +390,27 @@ export function ExplorerShell() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Plan</span>
                   <span className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs uppercase tracking-[0.2em]">
-                    {quota.planType}
+                    {quota.quotaMode === "paid" ? "credit pack" : quota.planType}
                   </span>
                 </div>
-                <p className="mt-3 text-slate-100">
-                  Free runs this month: {quota.freeUsed} / {quota.freeLimit}
-                </p>
-                <p className="mt-1 text-slate-300">Remaining: {quota.freeRemaining}</p>
-                <p className="mt-1 text-xs text-slate-400">
-                  Reset date: {new Date(quota.resetAt).toLocaleDateString()}
-                </p>
+                {quota.quotaMode === "paid" ? (
+                  <>
+                    <p className="mt-3 text-slate-100">
+                      Paid credits remaining: {quota.paidCreditsRemaining}
+                    </p>
+                    <p className="mt-1 text-slate-300">Total purchased credits: {quota.paidCreditsTotal}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="mt-3 text-slate-100">
+                      Free runs this month: {quota.freeUsed} / {quota.freeLimit}
+                    </p>
+                    <p className="mt-1 text-slate-300">Remaining: {quota.freeRemaining}</p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Reset date: {new Date(quota.resetAt).toLocaleDateString()}
+                    </p>
+                  </>
+                )}
               </div>
             )}
 
@@ -383,7 +430,7 @@ export function ExplorerShell() {
             <div className="min-h-[380px] overflow-hidden rounded-[24px] border border-white/8 bg-[#121827] p-3 shadow-[0_16px_70px_rgba(0,0,0,0.35)]">
               <CodeEditor
                 language={language}
-                onLanguageChange={setLanguage}
+                onLanguageChange={handleLanguageChange}
                 onRun={handleRun}
                 value={code}
                 onChange={setCode}
@@ -404,6 +451,7 @@ export function ExplorerShell() {
               code={code}
               language={language}
               onLoadSnippet={(snippet) => {
+                if (snippet.language === "java") return;
                 setCode(snippet.code);
                 setLanguage(snippet.language);
                 setCurrentStep(0);

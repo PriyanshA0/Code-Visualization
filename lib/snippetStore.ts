@@ -1,4 +1,4 @@
-export type SnippetLanguage = "javascript" | "python";
+export type SnippetLanguage = "javascript" | "python" | "java";
 
 export interface LocalSnippet {
   _id: string;

@@ -1,3 +1,6 @@
+
+import { Polar } from "@polar-sh/sdk";
+
 export interface CheckoutPayload {
   userId: string;
   returnUrl: string;
@@ -45,38 +48,21 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<C
 
   try {
     const successUrl = toAbsoluteUrl(payload.returnUrl || "/visualizer");
-
-    const response = await fetch(`${apiBase}/v1/checkouts`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        products: [productId],
-        success_url: successUrl,
-        metadata: {
-          clerkUserId: payload.userId,
-        },
-      }),
-      cache: "no-store",
+    const polar = new Polar({
+      accessToken,
+      serverURL: apiBase,
     });
 
-    const result = (await response.json().catch(() => null)) as
-      | { url?: string; checkout_url?: string; error?: string; detail?: string }
-      | null;
+    const checkout = await polar.checkouts.create({
+      products: [productId],
+      successUrl,
+      returnUrl: successUrl,
+      metadata: {
+        clerkUserId: payload.userId,
+      },
+    });
 
-    if (!response.ok) {
-      return {
-        provider: "polar",
-        placeholder: true,
-        configured: true,
-        message:
-          result?.detail || result?.error || "Polar checkout request failed. Check API credentials.",
-      };
-    }
-
-    const checkoutUrl = result?.url || result?.checkout_url;
+    const checkoutUrl = checkout.url || (checkout as { checkout_url?: string }).checkout_url;
     if (!checkoutUrl) {
       return {
         provider: "polar",
@@ -92,12 +78,17 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<C
       placeholder: false,
       configured: true,
     };
-  } catch {
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unable to connect to Polar API. Try again or verify POLAR_API_BASE_URL.";
+
     return {
       provider: "polar",
       placeholder: true,
       configured: true,
-      message: "Unable to connect to Polar API. Try again or verify POLAR_API_BASE_URL.",
+      message,
     };
   }
 }

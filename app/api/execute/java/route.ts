@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { executePython } from "@/lib/codeExecution/pythonExecutor";
+import { executeJava } from "@/lib/codeExecution/javaExecutor";
 import { CodeExecutionRequest } from "@/lib/codeExecution/types";
-import { checkAndConsumeExecutionQuota } from "@/lib/actions/codeExecution/quota";
+import { checkAndConsumeExecutionQuota, checkExecutionQuota } from "@/lib/actions/codeExecution/quota";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,14 +18,15 @@ export async function POST(request: NextRequest) {
     const { code, timeout = 5000 } = body;
 
     if (!code || typeof code !== "string") {
-      return NextResponse.json(
-        { error: "Invalid code provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid code provided" }, { status: 400 });
     }
 
-    const quota = await checkAndConsumeExecutionQuota(userId);
-    if (!quota.allowed) {
+    const quota =
+      process.env.NODE_ENV === "production"
+        ? await checkAndConsumeExecutionQuota(userId)
+        : await checkExecutionQuota(userId);
+
+    if (process.env.NODE_ENV === "production" && !quota.allowed) {
       const quotaErrorMessage =
         quota.quotaMode === "paid"
           ? "No credits remaining. Purchase 10 more credits to continue execution."
@@ -42,11 +43,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await executePython(code, timeout);
+    const result = await executeJava(code, timeout);
 
     return NextResponse.json({ ...result, quota });
   } catch (error) {
-    console.error("Python execution error:", error);
+    console.error("Java execution error:", error);
     return NextResponse.json(
       { error: "Failed to execute code" },
       { status: 500 }

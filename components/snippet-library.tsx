@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 
-type SnippetLanguage = "javascript" | "python";
+type SnippetLanguage = "javascript" | "python" | "java";
 
 interface Snippet {
   _id: string;

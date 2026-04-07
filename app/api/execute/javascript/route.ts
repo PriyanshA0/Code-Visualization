@@ -26,9 +26,14 @@ export async function POST(request: NextRequest) {
 
     const quota = await checkAndConsumeExecutionQuota(userId);
     if (!quota.allowed) {
+      const quotaErrorMessage =
+        quota.quotaMode === "paid"
+          ? "No credits remaining. Purchase 10 more credits to continue execution."
+          : "Free monthly attempts are finished. Purchase 10 credits to continue execution.";
+
       return NextResponse.json(
         {
-          error: "Free monthly attempt limit reached. Upgrade required.",
+          error: quotaErrorMessage,
           requiresPayment: true,
           checkoutPath: "/api/billing/checkout",
           quota,

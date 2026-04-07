@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 const CreateSnippetSchema = z.object({
   title: z.string().min(1).max(255),
   code: z.string().min(1),
-  language: z.enum(["javascript", "python"]),
+  language: z.enum(["javascript", "python", "java"]),
   description: z.string().optional(),
   isPublic: z.boolean().optional(),
 });
