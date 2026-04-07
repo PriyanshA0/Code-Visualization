@@ -133,7 +133,10 @@ export async function POST(request: NextRequest) {
   const resetAt = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
 
   if (eventId) {
-    const existing = await UserSubscription.findOne({ userId }).select("lastProcessedPolarEventId").lean();
+    const existing = (await UserSubscription.findOne({ userId })
+      .select("lastProcessedPolarEventId")
+      .lean()
+      .exec()) as { lastProcessedPolarEventId?: string } | null;
     if (existing?.lastProcessedPolarEventId === eventId) {
       return NextResponse.json(
         {
