@@ -19,6 +19,7 @@ interface CodeEditorProps {
   value: string;
   onChange: (code: string) => void;
   isRunning: boolean;
+  title: string;
 }
 
 export default function CodeEditor({
@@ -28,6 +29,7 @@ export default function CodeEditor({
   value,
   onChange,
   isRunning,
+  title,
 }: CodeEditorProps) {
   const handleRun = () => {
     onRun(value);
@@ -38,7 +40,7 @@ export default function CodeEditor({
       <div className="flex items-center justify-between border-b border-white/6 bg-[#141a2a] px-4 py-3">
         <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.35em] text-slate-400">
           <span className="h-2.5 w-2.5 rounded-full bg-orange-400" />
-          BUBBLE_SORT.JS
+          {title}
         </div>
 
         <div className="flex items-center gap-2 text-slate-300">

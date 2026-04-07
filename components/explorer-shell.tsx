@@ -34,6 +34,35 @@ interface QuotaView {
   resetAt: string;
 }
 
+function deriveEditorTitle(code: string, language: "javascript" | "python") {
+  const lines = code.split("\n").map((line) => line.trim()).filter(Boolean);
+  const firstLine = lines[0] ?? "";
+
+  if (language === "python") {
+    const fnMatch = code.match(/^\s*def\s+([A-Za-z_][\w]*)\s*\(/m);
+    if (fnMatch) return `${fnMatch[1].toUpperCase()}.PY`;
+
+    const classMatch = code.match(/^\s*class\s+([A-Za-z_][\w]*)\s*(?:\(|:)/m);
+    if (classMatch) return `${classMatch[1].toUpperCase()}.PY`;
+
+    return "UNTITLED.PY";
+  }
+
+  const fnMatch = code.match(/(?:function|const|let|var)\s+([A-Za-z_][\w]*)\s*(?:=\s*function\s*|=\s*\([^)]*\)\s*=>|\()/m);
+  if (fnMatch) return `${fnMatch[1].toUpperCase()}.JS`;
+
+  if (/^class\s+([A-Za-z_][\w]*)/m.test(code)) {
+    const classMatch = code.match(/^\s*class\s+([A-Za-z_][\w]*)/m);
+    if (classMatch) return `${classMatch[1].toUpperCase()}.JS`;
+  }
+
+  if (firstLine.startsWith("import ") || firstLine.startsWith("export ")) {
+    return "MODULE.JS";
+  }
+
+  return "UNTITLED.JS";
+}
+
 export function ExplorerShell() {
   const [language, setLanguage] = useState<"javascript" | "python">("javascript");
   const [executionTrace, setExecutionTrace] = useState<ExecutionTrace | null>(null);
@@ -46,6 +75,7 @@ export function ExplorerShell() {
   const [paywallMessage, setPaywallMessage] = useState<string | null>(null);
   const [showFreePrompt, setShowFreePrompt] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const editorTitle = deriveEditorTitle(code, language);
 
   useEffect(() => {
     const loadQuota = async () => {
@@ -267,7 +297,7 @@ export function ExplorerShell() {
             >
               Home
             </Link>
-            <UserButton afterSignOutUrl="/sign-in" />
+            <UserButton />
           </div>
           <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-[#141a2a] p-1 text-xs">
             <button
@@ -358,6 +388,7 @@ export function ExplorerShell() {
                 value={code}
                 onChange={setCode}
                 isRunning={isRunning}
+                title={editorTitle}
               />
             </div>
 

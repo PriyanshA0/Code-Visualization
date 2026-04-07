@@ -42,7 +42,7 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
             >
               Open Visualizer
             </Link>
-            <UserButton afterSignOutUrl="/" />
+            <UserButton />
           </>
         )}
       </ClerkLoaded>
