@@ -290,13 +290,15 @@ export function ExplorerShell() {
           </div>
         </div>
 
-        <div className="grid min-h-[calc(100vh-130px)] gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="grid min-h-[calc(100vh-130px)] gap-4 xl:grid-cols-1">
           <div className="min-h-0 rounded-[28px] border border-white/8 bg-[#121827] p-4 shadow-[0_20px_80px_rgba(0,0,0,0.35)]">
             <Visualizer
               code={code}
               executionTrace={executionTrace}
               currentStepIndex={currentStep}
               speed={speed}
+              isRunning={isRunning}
+              onStep={setCurrentStep}
             />
           </div>
 

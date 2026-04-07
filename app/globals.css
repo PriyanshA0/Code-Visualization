@@ -69,10 +69,175 @@ input[type="range"] {
   }
 }
 
+@keyframes live-caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.25;
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes object-box-move-pop {
+  0% {
+    transform: translateY(-50%) scale(0.95);
+    box-shadow: 0 0 0 rgba(34, 211, 238, 0);
+  }
+  55% {
+    transform: translateY(calc(-50% - 4px)) scale(1.03);
+    box-shadow: 0 0 26px rgba(34, 211, 238, 0.28);
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.14);
+  }
+}
+
 .line-focus-active {
   animation: line-focus-pulse 360ms ease-out;
 }
 
 .var-card-updated {
   animation: variable-update-pop 380ms ease-out;
+}
+
+.line-caret-live {
+  animation: live-caret-blink 820ms ease-in-out infinite;
+}
+
+.object-box-move {
+  animation: object-box-move-pop 520ms ease-out;
+}
+
+.flow-trace {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 8 8;
+  animation: flow-trace-dash 1.4s linear infinite;
+}
+
+.flow-trace-stable {
+  stroke: rgba(148, 163, 184, 0.45);
+}
+
+.flow-trace-moved {
+  stroke: rgba(56, 189, 248, 0.85);
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.25));
+}
+
+.object-node-moved {
+  animation: node-moved-bounce 520ms ease-out;
+}
+
+.object-node-changed {
+  animation: node-changed-pulse 420ms ease-out;
+}
+
+.object-node-new {
+  animation: node-new-pop 420ms ease-out;
+}
+
+.node-flow-active {
+  animation: flow-node-pulse 520ms ease-out;
+}
+
+.flow-branch-label {
+  animation: flow-branch-pop 480ms ease-out;
+}
+
+.code-node-function {
+  clip-path: polygon(18% 0%, 82% 0%, 100% 50%, 82% 100%, 18% 100%, 0% 50%);
+}
+
+.code-node-diamond {
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.code-node-hex {
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+
+@keyframes flow-trace-dash {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes node-moved-bounce {
+  0% {
+    transform: rotate(45deg) scale(0.9);
+  }
+  60% {
+    transform: rotate(45deg) scale(1.04);
+  }
+  100% {
+    transform: rotate(45deg) scale(1);
+  }
+}
+
+@keyframes node-changed-pulse {
+  0% {
+    transform: scale(0.95);
+    filter: saturate(90%);
+  }
+  55% {
+    transform: scale(1.03);
+    filter: saturate(120%);
+  }
+  100% {
+    transform: scale(1);
+    filter: saturate(100%);
+  }
+}
+
+@keyframes node-new-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes flow-node-pulse {
+  0% {
+    transform: scale(0.96);
+    filter: saturate(90%);
+  }
+  55% {
+    transform: scale(1.03);
+    filter: saturate(120%);
+  }
+  100% {
+    transform: scale(1);
+    filter: saturate(100%);
+  }
+}
+
+@keyframes flow-branch-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) translateX(-50%) scale(0.86);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%) scale(1);
+  }
 }

@@ -16,6 +16,14 @@ export default function VariablesPanel({
   currentStepIndex,
   totalSteps,
 }: VariablesPanelProps) {
+  const asJson = (value: unknown) => {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  };
+
   const renderValue = (value: unknown): string => {
     if (value === null) return "null";
     if (value === undefined) return "undefined";
@@ -24,7 +32,7 @@ export default function VariablesPanel({
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-[24px] border border-white/8 bg-[#141a2a] shadow-[0_16px_70px_rgba(0,0,0,0.35)]">
+    <div className="flex h-auto min-h-0 flex-col overflow-hidden rounded-[24px] border border-white/8 bg-[#141a2a] shadow-[0_16px_70px_rgba(0,0,0,0.35)]">
       <div className="border-b border-white/6 p-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-white">Variables & State</h3>
@@ -44,9 +52,8 @@ export default function VariablesPanel({
               (() => {
                 const hadKey = previousStep ? key in previousStep.variables : false;
                 const previousValue = hadKey ? previousStep?.variables[key] : undefined;
-                const changed =
-                  !hadKey ||
-                  JSON.stringify(previousValue) !== JSON.stringify(value);
+                const changed = !hadKey || asJson(previousValue) !== asJson(value);
+                const changeState = !hadKey ? "new" : changed ? "updated" : "stable";
 
                 return (
               <div
@@ -59,12 +66,20 @@ export default function VariablesPanel({
               >
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-white">{key}</p>
-                  {changed && (
+                  {changeState !== "stable" && (
                     <span className="rounded-full border border-emerald-300/30 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
-                      changed
+                      {changeState}
                     </span>
                   )}
                 </div>
+                {hadKey && changed && (
+                  <div className="mt-2 rounded-xl border border-white/8 bg-black/20 p-2 text-[11px] text-slate-300">
+                    <p className="uppercase tracking-[0.2em] text-slate-500">before</p>
+                    <pre className="mt-1 overflow-x-auto text-xs text-slate-300">
+                      {renderValue(previousValue)}
+                    </pre>
+                  </div>
+                )}
                 <pre className="mt-2 overflow-x-auto text-xs text-slate-300">
                   {renderValue(value)}
                 </pre>
@@ -89,9 +104,20 @@ export default function VariablesPanel({
             {step.callStack.map((frame: CallFrameInfo, idx: number) => (
               <div
                 key={idx}
-                className="rounded-2xl border border-indigo-400/20 bg-[#0b1020] px-3 py-2 text-sm text-slate-200"
+                className={`rounded-2xl border px-3 py-2 text-sm text-slate-200 ${
+                  idx === step.callStack.length - 1
+                    ? "border-indigo-300/30 bg-indigo-500/10"
+                    : "border-indigo-400/20 bg-[#0b1020]"
+                }`}
               >
-                {frame.functionName || JSON.stringify(frame)}
+                <div className="flex items-center justify-between gap-2">
+                  <span>{frame.functionName || JSON.stringify(frame)}</span>
+                  {idx === step.callStack.length - 1 && (
+                    <span className="rounded-full border border-indigo-300/30 bg-indigo-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-200">
+                      current
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

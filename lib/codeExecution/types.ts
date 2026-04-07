@@ -1,4 +1,5 @@
 export interface ExecutionStep {
+  description: string;
   line: number;
   column?: number;
   variables: Record<string, any>;
