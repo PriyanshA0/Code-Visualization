@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import Script from "next/script";
 import "./globals.css";
 
 const geist = Geist({
@@ -13,9 +14,39 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = "https://code-visualization.vercel.app";
+const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
 export const metadata: Metadata = {
   title: "talksy.code.visualizer",
   description: "Step-by-step code execution visualization platform",
+  metadataBase: new URL(siteUrl),
+  icons: {
+    icon: "/favicon_web.jpg",
+    shortcut: "/favicon_web.jpg",
+    apple: "/favicon_web.jpg",
+  },
+  openGraph: {
+    title: "talksy.code.visualizer",
+    description: "Step-by-step code execution visualization platform",
+    url: siteUrl,
+    siteName: "talksy.code.visualizer",
+    type: "website",
+    images: [
+      {
+        url: "/sharing_icon.jpg",
+        width: 1200,
+        height: 630,
+        alt: "talksy.code.visualizer sharing preview",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "talksy.code.visualizer",
+    description: "Step-by-step code execution visualization platform",
+    images: ["/sharing_icon.jpg"],
+  },
 };
 
 export default function RootLayout({
@@ -29,7 +60,23 @@ export default function RootLayout({
       className={`${geist.variable} ${geistMono.variable} antialiased`}
     >
       <body>
-        <ClerkProvider>{children}</ClerkProvider>
+        <ClerkProvider>
+          {children}
+          {gaMeasurementId ? (
+            <>
+              <Script
+                src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+                strategy="afterInteractive"
+              />
+              <Script id="google-analytics" strategy="afterInteractive">
+                {`window.dataLayer = window.dataLayer || [];
+function gtag(){window.dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${gaMeasurementId}', { page_path: window.location.pathname });`}
+              </Script>
+            </>
+          ) : null}
+        </ClerkProvider>
       </body>
     </html>
   );
