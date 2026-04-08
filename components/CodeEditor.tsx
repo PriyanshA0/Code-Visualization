@@ -36,10 +36,10 @@ export default function CodeEditor({
   };
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[20px] border border-white/6 bg-[#0b1020]">
-      <div className="flex items-center justify-between border-b border-white/6 bg-[#141a2a] px-4 py-3">
-        <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.35em] text-slate-400">
-          <span className="h-2.5 w-2.5 rounded-full bg-orange-400" />
+    <div className="pokemon-panel flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[20px]">
+      <div className="pokemon-header flex items-center justify-between border-b border-yellow-300/15 px-4 py-3">
+        <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.24em] text-yellow-100 sm:tracking-[0.35em]">
+          <span className="screen-electric-pulse h-2.5 w-2.5 rounded-full bg-yellow-300 shadow-[0_0_12px_rgba(250,204,21,0.7)]" />
           {title}
         </div>
 
@@ -47,7 +47,7 @@ export default function CodeEditor({
           <button
             onClick={() => onLanguageChange("javascript")}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-              language === "javascript" ? "bg-white/8 text-white" : "bg-white/0 text-slate-400 hover:bg-white/5"
+              language === "javascript" ? "bg-yellow-400/20 text-yellow-100" : "bg-white/0 text-slate-400 hover:bg-white/5"
             }`}
           >
             JS
@@ -55,7 +55,7 @@ export default function CodeEditor({
           <button
             onClick={() => onLanguageChange("python")}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-              language === "python" ? "bg-white/8 text-white" : "bg-white/0 text-slate-400 hover:bg-white/5"
+              language === "python" ? "bg-sky-400/20 text-sky-100" : "bg-white/0 text-slate-400 hover:bg-white/5"
             }`}
           >
             PY
@@ -63,7 +63,7 @@ export default function CodeEditor({
           <button
             onClick={handleRun}
             disabled={isRunning}
-            className="ml-2 rounded-lg bg-emerald-500 px-4 py-1.5 text-xs font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:brightness-110 disabled:opacity-50"
+            className="ml-2 rounded-lg bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-1.5 text-xs font-semibold text-[#04121f] shadow-lg shadow-emerald-500/25 transition hover:brightness-110 disabled:opacity-50"
           >
             {isRunning ? "Running..." : "Run"}
           </button>

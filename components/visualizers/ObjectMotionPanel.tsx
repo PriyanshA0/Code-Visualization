@@ -395,15 +395,15 @@ function ArrayVisualizer({ step, previousStep, currentStepIndex }: {
   const bh = (v: number) => Math.max(8, Math.round((v / maxVal) * MAX_H));
 
   return (
-    <div className="mb-6 rounded-2xl border border-white/8 bg-[#090e1a] p-5 pb-6">
+    <div className="pokemon-panel mb-6 rounded-2xl p-5 pb-6">
       {/* Header */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Array Visualizer</span>
-          <span className="rounded-full border border-indigo-400/25 bg-indigo-500/10 px-2 py-0.5 font-mono text-[11px] text-indigo-200">
+          <span className="text-xs font-bold uppercase tracking-[0.22em] text-yellow-100">Array Visualizer</span>
+          <span className="pokemon-chip rounded-full px-2 py-0.5 font-mono text-[11px]">
             {arrEntry.name}[{n}]
           </span>
-          <span className="rounded-full border border-white/8 bg-white/5 px-2 py-0.5 text-[11px] text-slate-300">
+          <span className="rounded-full border border-yellow-300/15 bg-white/5 px-2 py-0.5 text-[11px] text-slate-300">
             step {currentStepIndex + 1}
           </span>
         </div>
@@ -425,7 +425,7 @@ function ArrayVisualizer({ step, previousStep, currentStepIndex }: {
 
       {/* Chart */}
       <div className="overflow-x-auto overflow-y-hidden pb-2">
-        <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`} className="overflow-hidden">
+        <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`} className="screen-pokeball-open overflow-hidden">
           <defs>
             <linearGradient id="g-norm" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="rgba(99,102,241,0.9)" />
@@ -590,8 +590,8 @@ function VariableWatch({ step, previousStep }: { step: ExecutionStep | null; pre
   if (!entries.length) return null;
 
   return (
-    <div className="mb-6 rounded-2xl border border-white/8 bg-[#090e1a] p-4 pb-6">
-      <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Variable Watch</p>
+    <div className="pokemon-panel mb-6 rounded-2xl p-4 pb-6">
+      <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-yellow-100">Variable Watch</p>
       <div className="space-y-1.5">
         {entries.map(([key, val]) => {
           const prev = previousStep?.variables?.[key];

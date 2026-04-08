@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { UserButton } from "@clerk/nextjs";
 import CodeEditor from "@/components/CodeEditor";
 import ExecutionControls from "@/components/ExecutionControls";
@@ -266,16 +267,16 @@ export function ExplorerShell() {
   };
 
   return (
-    <main className="min-h-screen bg-[#060812] px-3 py-3 text-slate-100 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_20%_0%,rgba(250,204,21,0.18),transparent_26%),radial-gradient(circle_at_80%_0%,rgba(59,130,246,0.16),transparent_24%),linear-gradient(180deg,#04112b_0%,#071122_55%,#050911_100%)] px-3 py-3 text-yellow-50 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
       {showFreePrompt && quota && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-md rounded-2xl border border-indigo-400/40 bg-[#10172a] p-6 text-slate-100 shadow-[0_20px_80px_rgba(0,0,0,0.5)]">
+          <div className="w-full max-w-md rounded-2xl border border-indigo-400/40 bg-[#10172a] p-6 text-yellow-50 shadow-[0_20px_80px_rgba(0,0,0,0.5)]">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-indigo-300">Free Plan</p>
             <h2 className="mt-3 text-xl font-bold">You have only 2 free attempts</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-300">
+            <p className="mt-3 text-sm leading-6 text-yellow-100/80">
               Use your executions carefully. After free attempts are finished, you will need to upgrade.
             </p>
-            <p className="mt-4 text-sm text-slate-200">
+            <p className="mt-4 text-sm text-yellow-100">
               Remaining now: <span className="font-semibold">{quota.freeRemaining}</span>
             </p>
             <button
@@ -290,14 +291,14 @@ export function ExplorerShell() {
 
       {showUpgradePrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4">
-          <div className="w-full max-w-md rounded-2xl border border-amber-400/35 bg-[#1b1308] p-6 text-amber-100 shadow-[0_20px_80px_rgba(0,0,0,0.55)]">
+          <div className="w-full max-w-md rounded-2xl border border-amber-400/35 bg-[#1b1308] p-6 text-yellow-50 shadow-[0_20px_80px_rgba(0,0,0,0.55)]">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-amber-300">Upgrade Required</p>
-            <h2 className="mt-3 text-xl font-bold text-amber-100">Execution attempts are finished</h2>
-            <p className="mt-3 text-sm leading-6 text-amber-200/90">
+            <h2 className="mt-3 text-xl font-bold text-yellow-100">Execution attempts are finished</h2>
+            <p className="mt-3 text-sm leading-6 text-yellow-100/80">
               {paywallMessage || "You have no attempts left. Buy 10 more credits to continue."}
             </p>
             {quota && (
-              <p className="mt-3 text-sm text-amber-100/90">
+              <p className="mt-3 text-sm text-yellow-50/90">
                 {quota.quotaMode === "paid"
                   ? `Credits remaining: ${quota.paidCreditsRemaining}/${quota.paidCreditsTotal}`
                   : `Used: ${quota.freeUsed}/${quota.freeLimit} · Next reset: ${new Date(quota.resetAt).toLocaleDateString()}`}
@@ -312,7 +313,7 @@ export function ExplorerShell() {
               </button>
               <button
                 onClick={() => setShowUpgradePrompt(false)}
-                className="rounded-xl border border-amber-200/30 bg-white/5 px-4 py-2 text-sm font-semibold text-amber-100 transition hover:bg-white/10"
+                className="rounded-xl border border-amber-200/30 bg-white/5 px-4 py-2 text-sm font-semibold text-yellow-50 transition hover:bg-white/10"
               >
                 Close
               </button>
@@ -321,24 +322,30 @@ export function ExplorerShell() {
         </div>
       )}
 
-      <section className="mx-auto flex w-full max-w-[1700px] flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[#111827] px-3 py-3 sm:px-4">
+      <section className="mx-auto flex w-full max-w-[1700px] flex-col gap-4 screen-pokeball-open">
+        <div className="pokemon-header flex flex-wrap items-center justify-between gap-3 rounded-2xl px-3 py-3 sm:px-4">
           <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
-            <h1 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-sm sm:tracking-[0.2em]">
+            <div className="screen-pokeball-ring flex h-10 w-10 items-center justify-center rounded-full bg-[#0b1020] p-1 sm:h-12 sm:w-12">
+              <Image src="/pokemon/pokeball.png" alt="Pokeball" width={44} height={44} className="h-8 w-8 object-contain sm:h-10 sm:w-10" />
+            </div>
+            <div>
+            <h1 className="text-xs font-semibold uppercase tracking-[0.14em] text-yellow-100 sm:text-sm sm:tracking-[0.2em]">
               Code Visualization
             </h1>
+            <p className="text-[10px] uppercase tracking-[0.26em] text-slate-300">Pokemon runtime arena</p>
+            </div>
             <Link
               href="/"
-              className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-white/10"
+              className="pokemon-chip rounded-lg px-3 py-1.5 text-xs font-semibold transition hover:bg-yellow-400/20"
             >
               Home
             </Link>
             <UserButton />
           </div>
-          <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/8 bg-[#141a2a] p-1 text-xs sm:w-auto sm:justify-start">
+          <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-yellow-300/20 bg-[#121c36]/80 p-1 text-xs sm:w-auto sm:justify-start">
             <button
               className={`rounded-lg px-3 py-1.5 font-semibold transition ${
-                mode === "step" ? "bg-white/10 text-white" : "text-slate-400"
+                mode === "step" ? "bg-yellow-400/20 text-yellow-100" : "text-slate-400"
               }`}
               onClick={() => setMode("step")}
             >
@@ -357,7 +364,7 @@ export function ExplorerShell() {
         </div>
 
         <div className="grid gap-4 lg:min-h-[calc(100vh-130px)] xl:grid-cols-1">
-          <div className="min-h-0 rounded-[24px] border border-white/8 bg-[#121827] p-3 shadow-[0_20px_80px_rgba(0,0,0,0.35)] sm:rounded-[28px] sm:p-4">
+          <div className="pokemon-panel min-h-0 rounded-[24px] p-3 sm:rounded-[28px] sm:p-4">
             <Visualizer
               code={code}
               executionTrace={executionTrace}
@@ -369,8 +376,8 @@ export function ExplorerShell() {
           </div>
 
           <aside className="flex min-h-0 flex-col gap-4">
-            <div className="rounded-2xl border border-white/8 bg-[#141a2a] p-4 shadow-[0_16px_60px_rgba(0,0,0,0.3)]">
-              <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-400">
+            <div className="pokemon-panel rounded-2xl p-4">
+              <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.2em] text-yellow-100">
                 <span>Speed</span>
                 <span>{speed.toFixed(1)}x</span>
               </div>
@@ -386,27 +393,27 @@ export function ExplorerShell() {
             </div>
 
             {quota && (
-              <div className="rounded-2xl border border-white/8 bg-[#141a2a] p-4 text-sm text-slate-200 shadow-[0_16px_60px_rgba(0,0,0,0.3)]">
+              <div className="pokemon-panel rounded-2xl p-4 text-sm text-yellow-50">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Plan</span>
-                  <span className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs uppercase tracking-[0.2em]">
+                  <span className="text-xs uppercase tracking-[0.2em] text-yellow-100">Plan</span>
+                  <span className="pokemon-chip rounded-lg px-2 py-1 text-xs uppercase tracking-[0.2em]">
                     {quota.quotaMode === "paid" ? "credit pack" : quota.planType}
                   </span>
                 </div>
                 {quota.quotaMode === "paid" ? (
                   <>
-                    <p className="mt-3 text-slate-100">
+                    <p className="mt-3 text-yellow-50">
                       Paid credits remaining: {quota.paidCreditsRemaining}
                     </p>
-                    <p className="mt-1 text-slate-300">Total purchased credits: {quota.paidCreditsTotal}</p>
+                    <p className="mt-1 text-yellow-100/80">Total purchased credits: {quota.paidCreditsTotal}</p>
                   </>
                 ) : (
                   <>
-                    <p className="mt-3 text-slate-100">
+                    <p className="mt-3 text-yellow-50">
                       Free runs this month: {quota.freeUsed} / {quota.freeLimit}
                     </p>
-                    <p className="mt-1 text-slate-300">Remaining: {quota.freeRemaining}</p>
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="mt-1 text-yellow-100/80">Remaining: {quota.freeRemaining}</p>
+                    <p className="mt-1 text-xs text-yellow-100/70">
                       Reset date: {new Date(quota.resetAt).toLocaleDateString()}
                     </p>
                   </>
@@ -415,7 +422,7 @@ export function ExplorerShell() {
             )}
 
             {paywallMessage && (
-              <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-100 shadow-[0_16px_60px_rgba(0,0,0,0.3)]">
+              <div className="pokemon-panel rounded-2xl p-4 text-sm text-yellow-50">
                 <p className="font-semibold">Upgrade required</p>
                 <p className="mt-1 leading-6">{paywallMessage}</p>
                 <button
@@ -427,7 +434,7 @@ export function ExplorerShell() {
               </div>
             )}
 
-            <div className="min-h-[320px] overflow-hidden rounded-[20px] border border-white/8 bg-[#121827] p-2 shadow-[0_16px_70px_rgba(0,0,0,0.35)] sm:min-h-[380px] sm:rounded-[24px] sm:p-3">
+            <div className="pokemon-panel min-h-[320px] overflow-hidden rounded-[20px] p-2 sm:min-h-[380px] sm:rounded-[24px] sm:p-3">
               <CodeEditor
                 language={language}
                 onLanguageChange={handleLanguageChange}

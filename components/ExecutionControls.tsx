@@ -41,7 +41,7 @@ export default function ExecutionControls({
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-[20px] border border-white/6 bg-[#141a2a] p-4 text-slate-200 shadow-[0_16px_60px_rgba(0,0,0,0.3)]">
+    <div className="pokemon-panel flex flex-col gap-4 rounded-[20px] p-4 text-slate-200">
       {executionTrace && (
         <div className="space-y-2 text-sm">
           <p className="text-slate-200">
@@ -64,7 +64,7 @@ export default function ExecutionControls({
         <button
           onClick={handleReset}
           disabled={isRunning || currentStep === 0}
-          className="flex-1 rounded-xl border border-white/8 bg-white/5 px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 disabled:opacity-50"
+          className="flex-1 rounded-xl border border-yellow-300/15 bg-white/5 px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-yellow-300/10 disabled:opacity-50"
           title="Reset to start"
         >
           ⏮ Start
@@ -73,7 +73,7 @@ export default function ExecutionControls({
         <button
           onClick={handlePrevious}
           disabled={isRunning || currentStep === 0}
-          className="flex-1 rounded-xl border border-white/8 bg-white/5 px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 disabled:opacity-50"
+          className="flex-1 rounded-xl border border-yellow-300/15 bg-white/5 px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-yellow-300/10 disabled:opacity-50"
           title="Previous step"
         >
           ◀ Prev
@@ -82,7 +82,7 @@ export default function ExecutionControls({
         <button
           onClick={handleNext}
           disabled={isRunning || currentStep >= totalSteps - 1}
-          className="flex-1 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-3 py-2 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-110 disabled:opacity-50"
+          className="flex-1 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-500 px-3 py-2 text-sm font-medium text-[#04121f] shadow-lg shadow-amber-500/25 transition hover:brightness-110 disabled:opacity-50"
           title="Next step"
         >
           Next ▶
@@ -91,7 +91,7 @@ export default function ExecutionControls({
         <button
           onClick={handleLast}
           disabled={isRunning || currentStep === totalSteps - 1}
-          className="flex-1 rounded-xl border border-white/8 bg-white/5 px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 disabled:opacity-50"
+          className="flex-1 rounded-xl border border-yellow-300/15 bg-white/5 px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-yellow-300/10 disabled:opacity-50"
           title="Jump to end"
         >
           End ⏭
@@ -109,15 +109,15 @@ export default function ExecutionControls({
             disabled={isRunning}
             className="w-full"
           />
-          <p className="text-center text-xs tracking-[0.25em] text-slate-400 uppercase">
+          <p className="text-center text-xs tracking-[0.25em] text-yellow-100 uppercase">
             Step: {currentStep + 1} / {totalSteps}
           </p>
         </div>
       )}
 
       {executionTrace?.output && (
-        <div className="mt-2 rounded-2xl border border-white/8 bg-[#0b1020] p-3">
-          <p className="mb-2 text-xs uppercase tracking-[0.3em] text-slate-400">Output</p>
+        <div className="mt-2 rounded-2xl border border-yellow-300/15 bg-[#0b1020] p-3">
+          <p className="mb-2 text-xs uppercase tracking-[0.3em] text-yellow-100">Output</p>
           <pre className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words text-xs text-slate-200">
             {executionTrace.output}
           </pre>

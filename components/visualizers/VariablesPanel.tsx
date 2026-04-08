@@ -32,15 +32,15 @@ export default function VariablesPanel({
   };
 
   return (
-    <div className="flex h-auto min-h-0 flex-col overflow-hidden rounded-[24px] border border-white/8 bg-[#141a2a] shadow-[0_16px_70px_rgba(0,0,0,0.35)]">
-      <div className="border-b border-white/6 p-4">
+    <div className="pokemon-panel flex h-auto min-h-0 flex-col overflow-hidden rounded-[24px]">
+      <div className="border-b border-yellow-300/15 p-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white">Variables & State</h3>
-          <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold tracking-[0.25em] text-emerald-300">
+          <h3 className="text-lg font-bold text-yellow-100">Variables & State</h3>
+          <span className="pokemon-chip rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.25em]">
             ACTIVE STEP
           </span>
         </div>
-        <p className="mt-2 text-xs tracking-[0.25em] text-slate-400 uppercase">
+        <p className="mt-2 text-xs tracking-[0.25em] text-slate-300 uppercase">
           Step {currentStepIndex + 1} of {totalSteps}
         </p>
       </div>
@@ -61,20 +61,20 @@ export default function VariablesPanel({
                 className={`rounded-2xl border p-3 transition-all duration-300 ${
                   changed
                     ? "var-card-updated border-emerald-300/30 bg-emerald-400/10"
-                    : "border-white/8 bg-[#0b1020]"
+                    : "border-yellow-300/10 bg-[#0b1020]"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-white">{key}</p>
                   {changeState !== "stable" && (
-                    <span className="rounded-full border border-emerald-300/30 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+                    <span className="rounded-full border border-yellow-300/20 bg-yellow-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-yellow-100">
                       {changeState}
                     </span>
                   )}
                 </div>
                 {hadKey && changed && (
-                  <div className="mt-2 rounded-xl border border-white/8 bg-black/20 p-2 text-[11px] text-slate-300">
-                    <p className="uppercase tracking-[0.2em] text-slate-500">before</p>
+                  <div className="mt-2 rounded-xl border border-yellow-300/10 bg-black/20 p-2 text-[11px] text-slate-300">
+                    <p className="uppercase tracking-[0.2em] text-yellow-100/60">before</p>
                     <pre className="mt-1 overflow-x-auto text-xs text-slate-300">
                       {renderValue(previousValue)}
                     </pre>
@@ -96,8 +96,8 @@ export default function VariablesPanel({
       </div>
 
       {step && step.callStack.length > 0 && (
-        <div className="border-t border-white/6 p-4">
-          <h4 className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">
+        <div className="border-t border-yellow-300/15 p-4">
+          <h4 className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-yellow-100">
             Call Stack
           </h4>
           <div className="space-y-2">
@@ -106,14 +106,14 @@ export default function VariablesPanel({
                 key={idx}
                 className={`rounded-2xl border px-3 py-2 text-sm text-slate-200 ${
                   idx === step.callStack.length - 1
-                    ? "border-indigo-300/30 bg-indigo-500/10"
+                    ? "border-yellow-300/30 bg-yellow-500/10"
                     : "border-indigo-400/20 bg-[#0b1020]"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <span>{frame.functionName || JSON.stringify(frame)}</span>
                   {idx === step.callStack.length - 1 && (
-                    <span className="rounded-full border border-indigo-300/30 bg-indigo-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-200">
+                    <span className="rounded-full border border-yellow-300/20 bg-yellow-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-yellow-100">
                       current
                     </span>
                   )}
