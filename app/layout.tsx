@@ -33,28 +33,28 @@ export const metadata: Metadata = {
     "learning to code",
   ],
   alternates: {
-    canonical: "/",
+    canonical: `${siteUrl}/`,
   },
   icons: {
     icon: [
-      { url: "/stress.png", type: "image/png" },
-      { url: "/stress.png?v=2", type: "image/png" },
+      { url: "/pokemon/pikachu.png", type: "image/png" },
+      { url: "/pokemon/pikachu.png?v=3", type: "image/png" },
     ],
-    shortcut: "/stress.png?v=2",
-    apple: "/stress.png?v=2",
+    shortcut: "/pokemon/pikachu.png?v=3",
+    apple: "/pokemon/pikachu.png?v=3",
   },
   openGraph: {
     title: "talksy.code.visualizer",
     description: "Step-by-step code execution visualization platform",
-    url: siteUrl,
+    url: `${siteUrl}/`,
     siteName: "talksy.code.visualizer",
     type: "website",
     images: [
       {
-        url: "/confused.png",
+        url: "/pokemon/battle.png",
         width: 1200,
         height: 630,
-        alt: "talksy.code.visualizer sharing preview",
+        alt: "Pokemon themed code visualizer preview",
       },
     ],
   },
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "talksy.code.visualizer",
     description: "Step-by-step code execution visualization platform",
-    images: ["/confused.png"],
+    images: ["/pokemon/battle.png"],
   },
 };
 

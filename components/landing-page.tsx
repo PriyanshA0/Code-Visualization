@@ -1,5 +1,29 @@
 import React from "react";
+import Image from "next/image";
 import { AuthButtons } from "@/components/auth-buttons";
+
+const pokemonTeam = [
+  "/pokemon/pikachu.png",
+  "/pokemon/squirtle.png",
+  "/pokemon/bullbasaur.png",
+  "/pokemon/chatmender.png",
+];
+
+const capabilityPokemon = [
+  "/pokemon/alien.png",
+  "/pokemon/meowth.png",
+  "/pokemon/caterpie.png",
+  "/pokemon/psyduck.png",
+  "/pokemon/snorlax.png",
+  "/pokemon/algorithm.png",
+];
+
+const workflowPokemon = [
+  "/pokemon/pokeball.png",
+  "/pokemon/pikachu.png",
+  "/pokemon/battle.png",
+  "/pokemon/confused.png",
+];
 
 const highlights = [
   "JavaScript + Python execution",
@@ -116,10 +140,10 @@ const benchmarkRows = [
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#050910] text-slate-100">
-      <header className="sticky top-0 z-30 border-b border-white/6 bg-[#060812]/80 backdrop-blur-xl">
+    <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_50%_-20%,rgba(250,204,21,0.28),transparent_35%),linear-gradient(180deg,#04122d_0%,#081739_45%,#071022_100%)] text-slate-100">
+      <header className="sticky top-0 z-30 border-b border-yellow-300/20 bg-[#071430]/85 backdrop-blur-xl">
         <div className="mx-auto flex min-h-16 max-w-[1440px] flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6 lg:px-8">
-          <div className="text-base font-extrabold tracking-tight text-indigo-300 sm:text-lg">
+          <div className="text-base font-extrabold tracking-tight text-yellow-300 sm:text-lg">
             TalkSy.code.visualization
           </div>
           <nav className="hidden items-center gap-8 text-sm font-medium text-slate-300 md:flex">
@@ -137,14 +161,20 @@ export function LandingPage() {
         </div>
       </header>
 
-      <section className="relative overflow-hidden border-b border-white/6">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(99,102,241,0.2),_transparent_34%),linear-gradient(180deg,#020616_0%,#040b1d_75%,#050910_100%)]" />
+      <section className="relative overflow-hidden border-b border-yellow-300/15">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(250,204,21,0.22),_transparent_34%),linear-gradient(180deg,#04122d_0%,#082049_75%,#061128_100%)]" />
+        <div className="pointer-events-none absolute -left-6 top-12 hidden opacity-85 md:block">
+          <Image src="/pokemon/pikachu.png" alt="Pikachu" width={120} height={120} className="drop-shadow-[0_0_20px_rgba(250,204,21,0.45)]" />
+        </div>
+        <div className="pointer-events-none absolute -right-4 top-20 hidden opacity-85 md:block">
+          <Image src="/pokemon/squirtle.png" alt="Squirtle" width={108} height={108} className="drop-shadow-[0_0_20px_rgba(56,189,248,0.45)]" />
+        </div>
         <div className="relative mx-auto max-w-[1440px] px-4 pb-10 pt-14 sm:px-6 sm:pb-12 sm:pt-20 lg:px-8 lg:pb-16 lg:pt-24">
           <div className="mx-auto max-w-4xl text-center hero-fade-up" style={{ animationDelay: "40ms" }}>
-            <h1 className="text-balance text-4xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl">
+            <h1 className="text-balance text-4xl font-black tracking-tight text-yellow-100 sm:text-6xl lg:text-7xl">
               See your code
               <br className="hidden sm:block" />
-              <span className="sm:pl-2">come to life</span>
+              <span className="text-yellow-300 sm:pl-2">Pokemon battle style</span>
             </h1>
             <p
               className="typing-line typing-line-short mx-auto mt-4 max-w-full text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200 sm:mt-5 sm:text-[12px] sm:tracking-[0.24em]"
@@ -152,8 +182,8 @@ export function LandingPage() {
             >
               run code • inspect state • trace flow
             </p>
-            <p className="mx-auto mt-5 max-w-3xl text-base leading-7 text-slate-300 sm:text-xl sm:leading-9 hero-fade-up" style={{ animationDelay: "200ms" }}>
-              Visualize algorithms step by step with real-time animations. Transform abstract logic into spatial reality.
+            <p className="mx-auto mt-5 max-w-3xl text-base leading-7 text-slate-200 sm:text-xl sm:leading-9 hero-fade-up" style={{ animationDelay: "200ms" }}>
+              Catch every runtime move and watch your logic evolve like a Pokemon turn battle with vivid, real-time visual feedback.
             </p>
             <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 hero-fade-up sm:w-auto sm:flex-row sm:flex-wrap sm:items-center" style={{ animationDelay: "280ms" }}>
               <a
@@ -169,10 +199,17 @@ export function LandingPage() {
                 View Sandbox
               </a>
             </div>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              {pokemonTeam.map((src) => (
+                <div key={src} className="rounded-full border border-yellow-300/30 bg-[#07183a]/80 p-1.5">
+                  <Image src={src} alt="Pokemon icon" width={46} height={46} className="h-11 w-11 rounded-full object-cover" />
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="mt-10 grid gap-5 lg:grid-cols-2">
-            <div className="hero-float rounded-2xl border border-white/8 bg-[#111a31]/70 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.42)]" style={{ animationDelay: "300ms" }}>
+            <div className="hero-float rounded-2xl border border-yellow-300/20 bg-[#0b1f46]/65 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.42)]" style={{ animationDelay: "300ms" }}>
               <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold tracking-[0.28em] text-slate-500">
                 <span className="h-2.5 w-2.5 rounded-full bg-slate-500" />
                 BINARY_SEARCH.PY
@@ -193,7 +230,7 @@ export function LandingPage() {
               </div>
             </div>
 
-            <div className="hero-float rounded-2xl border border-white/8 bg-[#10182e]/70 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.42)]" style={{ animationDelay: "420ms" }}>
+            <div className="hero-float rounded-2xl border border-yellow-300/20 bg-[#112549]/65 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.42)]" style={{ animationDelay: "420ms" }}>
               <div className="hero-glow-drift relative flex min-h-[250px] items-center justify-center overflow-hidden rounded-xl border border-white/6 bg-[radial-gradient(circle,_rgba(255,255,255,0.03)_0%,_transparent_75%)] p-4 sm:min-h-[310px] sm:p-6">
                 <div className="relative h-[180px] w-full max-w-[320px] sm:h-[220px] sm:max-w-[420px]">
                   <div className="hero-node-pulse absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-indigo-400 text-lg font-extrabold text-[#101427] shadow-[0_10px_30px_rgba(99,102,241,0.45)]" style={{ animationDelay: "0ms" }}>
@@ -218,13 +255,13 @@ export function LandingPage() {
       </section>
 
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_10%,_rgba(14,165,233,0.22),_transparent_30%),radial-gradient(circle_at_84%_8%,_rgba(16,185,129,0.18),_transparent_24%),linear-gradient(180deg,rgba(5,9,16,0.1)_0%,rgba(5,9,16,1)_92%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_10%,_rgba(250,204,21,0.22),_transparent_30%),radial-gradient(circle_at_84%_8%,_rgba(56,189,248,0.22),_transparent_24%),linear-gradient(180deg,rgba(5,9,16,0.1)_0%,rgba(5,9,16,1)_92%)]" />
         <div className="mx-auto grid max-w-[1440px] gap-6 px-4 pb-12 pt-16 sm:px-6 sm:pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8 lg:px-8 lg:pb-24 lg:pt-28">
           <div className="relative z-10">
-            <p className="inline-flex items-center rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-200 sm:text-[11px] sm:tracking-[0.24em]">
-              Runtime Intelligence Platform
+            <p className="inline-flex items-center rounded-full border border-yellow-300/40 bg-yellow-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-yellow-200 sm:text-[11px] sm:tracking-[0.24em]">
+              Pokemon Runtime Arena
             </p>
-            <h1 className="mt-4 max-w-3xl text-balance text-4xl font-black tracking-tight text-white sm:mt-5 sm:text-5xl lg:text-7xl">
+            <h1 className="mt-4 max-w-3xl text-balance text-4xl font-black tracking-tight text-yellow-100 sm:mt-5 sm:text-5xl lg:text-7xl">
               Understand code behavior, not just code syntax
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300 sm:mt-5 sm:text-base sm:leading-7 lg:text-lg">
@@ -345,10 +382,18 @@ export function LandingPage() {
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {capabilityCards.map((card) => (
+          {capabilityCards.map((card, index) => (
             <article key={card.title} className="rounded-2xl border border-white/10 bg-[#0b1324] p-5 shadow-[0_16px_50px_rgba(0,0,0,0.22)]">
               <div className="mb-4 flex items-center justify-between">
-                <div className={`h-10 w-10 rounded-xl border border-white/10 bg-gradient-to-br ${card.accent}`} />
+                <div className="h-10 w-10 overflow-hidden rounded-xl border border-yellow-200/30 bg-[#172a57]">
+                  <Image
+                    src={capabilityPokemon[index % capabilityPokemon.length]}
+                    alt={`${card.title} icon`}
+                    width={40}
+                    height={40}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
                 <span className="rounded-full border border-white/12 bg-white/5 px-2 py-0.5 text-[10px] font-semibold tracking-[0.2em] text-slate-300">{card.tag}</span>
               </div>
               <h3 className="text-xl font-semibold text-white">{card.title}</h3>
@@ -358,9 +403,18 @@ export function LandingPage() {
         </div>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {algorithmCards.map((item) => (
+          {algorithmCards.map((item, index) => (
             <article key={item.title} className="rounded-2xl border border-white/10 bg-[#11192b] p-4">
+              <div className="mb-2 flex items-center gap-2">
+                <Image
+                  src={capabilityPokemon[(index + 3) % capabilityPokemon.length]}
+                  alt={`${item.title} pokemon`}
+                  width={24}
+                  height={24}
+                  className="h-6 w-6 rounded-full border border-yellow-200/25 object-cover"
+                />
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-indigo-300">{item.tag}</p>
+              </div>
               <h3 className="mt-2 text-base font-semibold text-white">{item.title}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-300">{item.description}</p>
             </article>
@@ -375,9 +429,18 @@ export function LandingPage() {
             <p className="mt-3 text-sm text-slate-400">A practical runtime workflow designed for debugging, teaching, and onboarding.</p>
           </div>
           <div className="grid gap-4 lg:grid-cols-4">
-            {workflow.map((item) => (
+            {workflow.map((item, index) => (
               <article key={item.step} className="rounded-2xl border border-white/10 bg-[#11192b] p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.3em] text-cyan-300">{item.step}</p>
+                <div className="mb-2 flex items-center gap-2">
+                  <Image
+                    src={workflowPokemon[index % workflowPokemon.length]}
+                    alt={`Step ${item.step} icon`}
+                    width={26}
+                    height={26}
+                    className="h-6 w-6 rounded-full border border-yellow-200/30 object-cover"
+                  />
+                  <p className="text-xs font-bold uppercase tracking-[0.3em] text-cyan-300">{item.step}</p>
+                </div>
                 <h3 className="mt-3 text-lg font-semibold text-white">{item.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-300">{item.description}</p>
               </article>
