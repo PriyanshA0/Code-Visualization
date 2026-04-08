@@ -266,7 +266,7 @@ export function ExplorerShell() {
   };
 
   return (
-    <main className="min-h-screen bg-[#060812] px-4 py-4 text-slate-100 lg:px-6 lg:py-6">
+    <main className="min-h-screen bg-[#060812] px-3 py-3 text-slate-100 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
       {showFreePrompt && quota && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
           <div className="w-full max-w-md rounded-2xl border border-indigo-400/40 bg-[#10172a] p-6 text-slate-100 shadow-[0_20px_80px_rgba(0,0,0,0.5)]">
@@ -322,9 +322,9 @@ export function ExplorerShell() {
       )}
 
       <section className="mx-auto flex w-full max-w-[1700px] flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[#111827] px-4 py-3">
-          <div className="flex items-center gap-3">
-            <h1 className="text-sm font-semibold tracking-[0.2em] text-slate-200 uppercase">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[#111827] px-3 py-3 sm:px-4">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
+            <h1 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-sm sm:tracking-[0.2em]">
               Code Visualization
             </h1>
             <Link
@@ -335,7 +335,7 @@ export function ExplorerShell() {
             </Link>
             <UserButton />
           </div>
-          <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-[#141a2a] p-1 text-xs">
+          <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/8 bg-[#141a2a] p-1 text-xs sm:w-auto sm:justify-start">
             <button
               className={`rounded-lg px-3 py-1.5 font-semibold transition ${
                 mode === "step" ? "bg-white/10 text-white" : "text-slate-400"
@@ -356,8 +356,8 @@ export function ExplorerShell() {
           </div>
         </div>
 
-        <div className="grid min-h-[calc(100vh-130px)] gap-4 xl:grid-cols-1">
-          <div className="min-h-0 rounded-[28px] border border-white/8 bg-[#121827] p-4 shadow-[0_20px_80px_rgba(0,0,0,0.35)]">
+        <div className="grid gap-4 lg:min-h-[calc(100vh-130px)] xl:grid-cols-1">
+          <div className="min-h-0 rounded-[24px] border border-white/8 bg-[#121827] p-3 shadow-[0_20px_80px_rgba(0,0,0,0.35)] sm:rounded-[28px] sm:p-4">
             <Visualizer
               code={code}
               executionTrace={executionTrace}
@@ -427,7 +427,7 @@ export function ExplorerShell() {
               </div>
             )}
 
-            <div className="min-h-[380px] overflow-hidden rounded-[24px] border border-white/8 bg-[#121827] p-3 shadow-[0_16px_70px_rgba(0,0,0,0.35)]">
+            <div className="min-h-[320px] overflow-hidden rounded-[20px] border border-white/8 bg-[#121827] p-2 shadow-[0_16px_70px_rgba(0,0,0,0.35)] sm:min-h-[380px] sm:rounded-[24px] sm:p-3">
               <CodeEditor
                 language={language}
                 onLanguageChange={handleLanguageChange}

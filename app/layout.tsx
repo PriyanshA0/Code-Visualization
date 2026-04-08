@@ -36,9 +36,12 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   icons: {
-    icon: "/favicon_web.jpg",
-    shortcut: "/favicon_web.jpg",
-    apple: "/favicon_web.jpg",
+    icon: [
+      { url: "/stress.png", type: "image/png" },
+      { url: "/stress.png?v=2", type: "image/png" },
+    ],
+    shortcut: "/stress.png?v=2",
+    apple: "/stress.png?v=2",
   },
   openGraph: {
     title: "talksy.code.visualizer",
@@ -48,7 +51,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/sharing_icon.jpg",
+        url: "/confused.png",
         width: 1200,
         height: 630,
         alt: "talksy.code.visualizer sharing preview",
@@ -59,7 +62,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "talksy.code.visualizer",
     description: "Step-by-step code execution visualization platform",
-    images: ["/sharing_icon.jpg"],
+    images: ["/confused.png"],
   },
 };
 

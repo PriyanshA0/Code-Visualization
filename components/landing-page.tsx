@@ -116,10 +116,10 @@ const benchmarkRows = [
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen bg-[#050910] text-slate-100">
+    <main className="min-h-screen overflow-x-hidden bg-[#050910] text-slate-100">
       <header className="sticky top-0 z-30 border-b border-white/6 bg-[#060812]/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="text-lg font-extrabold tracking-tight text-indigo-300">
+        <div className="mx-auto flex min-h-16 max-w-[1440px] flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6 lg:px-8">
+          <div className="text-base font-extrabold tracking-tight text-indigo-300 sm:text-lg">
             TalkSy.code.visualization
           </div>
           <nav className="hidden items-center gap-8 text-sm font-medium text-slate-300 md:flex">
@@ -147,7 +147,7 @@ export function LandingPage() {
               <span className="sm:pl-2">come to life</span>
             </h1>
             <p
-              className="typing-line typing-line-short mx-auto mt-4 max-w-full text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-200 sm:mt-5 sm:text-[12px]"
+              className="typing-line typing-line-short mx-auto mt-4 max-w-full text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200 sm:mt-5 sm:text-[12px] sm:tracking-[0.24em]"
               style={{ animationDelay: "140ms", ["--typing-width" as never]: "26ch" }}
             >
               run code • inspect state • trace flow
@@ -155,16 +155,16 @@ export function LandingPage() {
             <p className="mx-auto mt-5 max-w-3xl text-base leading-7 text-slate-300 sm:text-xl sm:leading-9 hero-fade-up" style={{ animationDelay: "200ms" }}>
               Visualize algorithms step by step with real-time animations. Transform abstract logic into spatial reality.
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 hero-fade-up" style={{ animationDelay: "280ms" }}>
+            <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 hero-fade-up sm:w-auto sm:flex-row sm:flex-wrap sm:items-center" style={{ animationDelay: "280ms" }}>
               <a
                 href="/visualizer"
-                className="rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 px-8 py-3 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(99,102,241,0.4)] transition hover:brightness-110"
+                className="rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 px-8 py-3 text-center text-sm font-semibold text-white shadow-[0_10px_30px_rgba(99,102,241,0.4)] transition hover:brightness-110"
               >
                 Launch Editor
               </a>
               <a
                 href="#docs"
-                className="rounded-2xl border border-white/12 bg-white/5 px-8 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/10"
+                className="rounded-2xl border border-white/12 bg-white/5 px-8 py-3 text-center text-sm font-semibold text-slate-100 transition hover:bg-white/10"
               >
                 View Sandbox
               </a>
@@ -177,7 +177,7 @@ export function LandingPage() {
                 <span className="h-2.5 w-2.5 rounded-full bg-slate-500" />
                 BINARY_SEARCH.PY
               </div>
-              <div className="rounded-xl border border-white/6 bg-[#050b1b] p-4 font-mono text-[11px] leading-6 text-slate-300">
+              <div className="overflow-x-auto rounded-xl border border-white/6 bg-[#050b1b] p-4 font-mono text-xs leading-5 text-slate-300 sm:text-[11px] sm:leading-6">
                 <p className="hero-code-line whitespace-pre" style={{ animationDelay: "70ms" }}><span className="text-sky-300">def</span> <span className="text-amber-300">binary_search</span>(arr, target):</p>
                 <p className="hero-code-line whitespace-pre" style={{ animationDelay: "130ms" }}>&nbsp;&nbsp;low = 0</p>
                 <p className="hero-code-line whitespace-pre" style={{ animationDelay: "190ms" }}>&nbsp;&nbsp;high = len(arr) - 1</p>
@@ -194,8 +194,8 @@ export function LandingPage() {
             </div>
 
             <div className="hero-float rounded-2xl border border-white/8 bg-[#10182e]/70 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.42)]" style={{ animationDelay: "420ms" }}>
-              <div className="hero-glow-drift relative flex min-h-[310px] items-center justify-center overflow-hidden rounded-xl border border-white/6 bg-[radial-gradient(circle,_rgba(255,255,255,0.03)_0%,_transparent_75%)] p-6">
-                <div className="relative h-[220px] w-full max-w-[420px]">
+              <div className="hero-glow-drift relative flex min-h-[250px] items-center justify-center overflow-hidden rounded-xl border border-white/6 bg-[radial-gradient(circle,_rgba(255,255,255,0.03)_0%,_transparent_75%)] p-4 sm:min-h-[310px] sm:p-6">
+                <div className="relative h-[180px] w-full max-w-[320px] sm:h-[220px] sm:max-w-[420px]">
                   <div className="hero-node-pulse absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-indigo-400 text-lg font-extrabold text-[#101427] shadow-[0_10px_30px_rgba(99,102,241,0.45)]" style={{ animationDelay: "0ms" }}>
                     42
                   </div>
@@ -221,7 +221,7 @@ export function LandingPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_10%,_rgba(14,165,233,0.22),_transparent_30%),radial-gradient(circle_at_84%_8%,_rgba(16,185,129,0.18),_transparent_24%),linear-gradient(180deg,rgba(5,9,16,0.1)_0%,rgba(5,9,16,1)_92%)]" />
         <div className="mx-auto grid max-w-[1440px] gap-6 px-4 pb-12 pt-16 sm:px-6 sm:pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8 lg:px-8 lg:pb-24 lg:pt-28">
           <div className="relative z-10">
-            <p className="inline-flex items-center rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-200 sm:text-[11px] sm:tracking-[0.24em]">
+            <p className="inline-flex items-center rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-200 sm:text-[11px] sm:tracking-[0.24em]">
               Runtime Intelligence Platform
             </p>
             <h1 className="mt-4 max-w-3xl text-balance text-4xl font-black tracking-tight text-white sm:mt-5 sm:text-5xl lg:text-7xl">
@@ -251,9 +251,9 @@ export function LandingPage() {
 
           <div className="relative z-10">
             <div className="rounded-2xl border border-white/10 bg-[#0b1324]/90 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.4)]">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400">Execution Snapshot</span>
-                <span className="rounded-full border border-emerald-300/30 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.18em] text-emerald-200">LIVE TRACE</span>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 sm:tracking-[0.25em]">Execution Snapshot</span>
+                <span className="rounded-full border border-emerald-300/30 bg-emerald-400/10 px-2 py-0.5 text-[11px] font-semibold tracking-[0.12em] text-emerald-200 sm:text-[10px] sm:tracking-[0.18em]">LIVE TRACE</span>
               </div>
               <div className="space-y-3 rounded-xl border border-white/10 bg-[#060c1a] p-4 font-mono text-xs text-slate-300">
                 <div className="rounded-lg bg-cyan-500/10 px-3 py-2 text-cyan-100">line 12: if (arr[j] &gt; arr[j + 1])</div>
@@ -264,7 +264,7 @@ export function LandingPage() {
                 </div>
                 <div className="rounded-lg border border-indigo-400/30 bg-indigo-500/10 px-3 py-2 text-indigo-200">flow: loop -&gt; compare -&gt; mutate</div>
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[11px] text-slate-300">
+              <div className="mt-4 grid grid-cols-1 gap-2 text-center text-xs text-slate-300 sm:grid-cols-3 sm:text-[11px]">
                 <div className="rounded-lg border border-white/10 bg-black/20 px-2 py-2">Frame 47</div>
                 <div className="rounded-lg border border-white/10 bg-black/20 px-2 py-2">2.1x Speed</div>
                 <div className="rounded-lg border border-white/10 bg-black/20 px-2 py-2">JS Runtime</div>
@@ -286,17 +286,17 @@ export function LandingPage() {
 
         <div className="grid gap-5 lg:grid-cols-2">
           <article className="rounded-2xl border border-white/10 bg-[#0b1324] p-5 shadow-[0_16px_50px_rgba(0,0,0,0.22)]">
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">Flow Example</p>
               <span className="rounded-full border border-cyan-300/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-200">STEP 7 / 18</span>
             </div>
             <div className="overflow-x-auto pb-2">
-              <div className="relative min-w-[640px] rounded-xl border border-white/8 bg-[#060d1d] p-5">
+              <div className="relative min-w-[520px] rounded-xl border border-white/8 bg-[#060d1d] p-4 sm:min-w-[640px] sm:p-5">
                 <div className="absolute inset-0 opacity-20" style={{
                   backgroundImage: "radial-gradient(circle, rgba(148,163,184,0.25) 1px, transparent 1px)",
                   backgroundSize: "20px 20px",
                 }} />
-                <div className="relative flex items-center gap-4">
+                <div className="relative flex items-center gap-3 sm:gap-4">
                   <div className="rounded-xl border border-white/12 bg-white/5 px-4 py-3 text-sm text-slate-300">for i loop</div>
                   <span className="text-cyan-300">-&gt;</span>
                   <div className="rounded-2xl border-2 border-amber-300/70 bg-amber-500/10 px-5 py-4 text-sm font-semibold text-amber-100 shadow-[0_0_30px_rgba(245,158,11,0.25)]">
@@ -310,11 +310,11 @@ export function LandingPage() {
           </article>
 
           <article className="rounded-2xl border border-white/10 bg-[#0b1324] p-5 shadow-[0_16px_50px_rgba(0,0,0,0.22)]">
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">Graph Example</p>
               <span className="rounded-full border border-emerald-300/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">BFS FRONTIER</span>
             </div>
-            <div className="relative h-[220px] rounded-xl border border-white/8 bg-[#060d1d] p-4">
+            <div className="relative h-[210px] rounded-xl border border-white/8 bg-[#060d1d] p-3 sm:h-[220px] sm:p-4">
               <div className="absolute inset-0 opacity-20" style={{
                 backgroundImage: "radial-gradient(circle, rgba(148,163,184,0.25) 1px, transparent 1px)",
                 backgroundSize: "20px 20px",
@@ -393,7 +393,7 @@ export function LandingPage() {
             <p className="mt-4 text-sm leading-7 text-slate-300">
               Beyond visualization, the platform includes the operational building blocks required for SaaS rollout: auth boundaries, quota logic, payment hooks, and persistent data models.
             </p>
-            <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
+            <div className="mt-6 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 sm:text-xs">
               <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-slate-200">Protected routes</div>
               <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-slate-200">Usage tracking</div>
               <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-slate-200">Billing webhook</div>
@@ -433,7 +433,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <footer className="mx-auto flex max-w-[1440px] flex-col items-start justify-between gap-4 border-t border-white/6 px-4 py-6 text-xs uppercase tracking-[0.25em] text-slate-500 sm:flex-row sm:items-center sm:px-6 lg:px-8">
+      <footer className="mx-auto flex max-w-[1440px] flex-col items-start justify-between gap-4 border-t border-white/6 px-4 py-6 text-[11px] uppercase tracking-[0.16em] text-slate-500 sm:flex-row sm:items-center sm:px-6 sm:text-xs sm:tracking-[0.25em] lg:px-8">
         <span>© 2026 TalkSy.code.visualization. built for precision.</span>
         <div className="flex flex-wrap gap-4 sm:gap-6">
           <span>Privacy</span>

@@ -61,7 +61,7 @@ function StepControlRow({
       >
         End
       </button>
-      <span className="ml-auto self-center text-[10px] uppercase tracking-[0.2em] text-slate-500">
+      <span className="w-full pt-1 text-right text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:ml-auto sm:w-auto sm:pt-0 sm:tracking-[0.2em]">
         Step {totalSteps > 0 ? currentStep + 1 : 0}/{totalSteps}
       </span>
     </div>
@@ -147,12 +147,12 @@ export default function Visualizer({
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto rounded-[24px] border border-white/8 bg-[#141a2a] p-4 shadow-[0_16px_70px_rgba(0,0,0,0.35)]">
-      <div className="rounded-2xl border border-white/6 bg-[#0b1020] p-4">
-        <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-[0.3em] text-slate-400">
+      <div className="rounded-2xl border border-white/6 bg-[#0b1020] p-3 sm:p-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-[0.2em] text-slate-400 sm:tracking-[0.3em]">
           <span>Live Visualization</span>
-          <div className="flex items-center gap-3 text-[11px] tracking-[0.2em] text-slate-500">
+          <div className="flex items-center gap-2 text-[11px] tracking-[0.14em] text-slate-500 sm:gap-3 sm:tracking-[0.2em]">
             <span>Speed: {speed.toFixed(1)}x</span>
-            <span className="h-1.5 w-24 rounded-full bg-white/10">
+            <span className="h-1.5 w-16 rounded-full bg-white/10 sm:w-24">
               <span
                 className="block h-full rounded-full bg-indigo-500 transition-all duration-300"
                 style={{ width: `${speedFill}%` }}
@@ -162,7 +162,7 @@ export default function Visualizer({
         </div>
         <div className="mb-3 grid gap-2 sm:grid-cols-[1fr_auto]">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">
+            <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500 sm:tracking-[0.28em]">
               Execution Timeline
             </p>
             <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/8">
@@ -179,7 +179,7 @@ export default function Visualizer({
             <span className="font-semibold text-slate-100">t+</span> {relativeTime}ms
           </div>
         </div>
-        <div ref={codeContainerRef} className="max-h-[470px] overflow-y-auto rounded-xl border border-white/6 bg-[#11182b]">
+        <div ref={codeContainerRef} className="max-h-[380px] overflow-y-auto rounded-xl border border-white/6 bg-[#11182b] sm:max-h-[470px]">
           <div className="font-mono text-sm text-slate-200">
             {lines.map((line, index) => {
               const lineNumber = index + 1;
