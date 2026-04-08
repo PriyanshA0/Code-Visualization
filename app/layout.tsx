@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import Script from "next/script";
+import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
 const geist = Geist({
@@ -14,13 +15,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://code-visualization.vercel.app";
+const siteUrl = getSiteUrl();
 const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export const metadata: Metadata = {
   title: "talksy.code.visualizer",
   description: "Step-by-step code execution visualization platform",
   metadataBase: new URL(siteUrl),
+  applicationName: "talksy.code.visualizer",
+  keywords: [
+    "code visualization",
+    "programming visualizer",
+    "algorithm animation",
+    "execution trace",
+    "JavaScript debugger",
+    "Python debugger",
+    "learning to code",
+  ],
+  alternates: {
+    canonical: "/",
+  },
   icons: {
     icon: "/favicon_web.jpg",
     shortcut: "/favicon_web.jpg",
