@@ -1,6 +1,25 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI ?? process.env.MONGODB_URL;
+function normalizeMongoUri(raw?: string) {
+  if (!raw) return undefined;
+
+  let value = raw.trim();
+
+  // Handle accidentally pasted values like: MONGODB_URI=mongodb+srv://...
+  value = value.replace(/^MONGODB_(?:URI|URL)\s*=\s*/i, "");
+
+  // Remove surrounding quotes if present.
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    value = value.slice(1, -1);
+  }
+
+  return value;
+}
+
+const MONGODB_URI = normalizeMongoUri(process.env.MONGODB_URI) ?? normalizeMongoUri(process.env.MONGODB_URL);
 
 function isUsableMongoUri(uri?: string) {
   if (!uri) return false;
