@@ -98,6 +98,19 @@ export function ExplorerShell() {
   };
 
   useEffect(() => {
+    const bootstrapUser = async () => {
+      try {
+        await fetch("/api/user/bootstrap", {
+          method: "POST",
+          credentials: "include",
+        });
+      } catch {
+        // Ignore bootstrap errors; quota/snippet routes will still handle access.
+      }
+    };
+
+    bootstrapUser();
+
     const loadQuota = async () => {
       try {
         const response = await fetch("/api/usage/quota", {
