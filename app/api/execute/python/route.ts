@@ -9,7 +9,20 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    let userId: string | null = null;
+    try {
+      ({ userId } = await auth());
+    } catch (authError) {
+      console.error("Python execute auth error:", authError);
+      return NextResponse.json(
+        {
+          error:
+            "Authentication service is unavailable. Verify Clerk keys in deployment environment.",
+        },
+        { status: 503 }
+      );
+    }
+
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -47,8 +60,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ...result, quota });
   } catch (error) {
     console.error("Python execution error:", error);
+    const errorMessage =
+      error instanceof Error && error.message
+        ? error.message
+        : "Failed to execute code";
     return NextResponse.json(
-      { error: "Failed to execute code" },
+      { error: errorMessage },
       { status: 500 }
     );
   }
