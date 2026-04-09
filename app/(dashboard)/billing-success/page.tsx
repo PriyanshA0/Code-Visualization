@@ -34,11 +34,22 @@ export default function BillingSuccessPage() {
           return;
         }
 
+        await fetch("/api/user/bootstrap", {
+          method: "POST",
+          credentials: "include",
+        });
+
         // Fetch user data from API to check isPro status
-        const response = await fetch(`/api/user/status?email=${encodeURIComponent(email)}`);
+        const response = await fetch(`/api/user/status?email=${encodeURIComponent(email)}`, {
+          credentials: "include",
+        });
 
         if (!response.ok) {
-          throw new Error("Failed to fetch user status");
+          setUserData({
+            isPro: false,
+            email,
+          });
+          return;
         }
 
         const data = await response.json();
