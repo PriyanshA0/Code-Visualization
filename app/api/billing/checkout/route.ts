@@ -14,9 +14,24 @@ export async function POST(request: NextRequest) {
   // Get user email from sessionClaims
   const emailAddress = (sessionClaims?.email || "") as string;
 
+  let finalReturnUrl = returnUrl;
+  if (emailAddress && returnUrl.includes("/billing-success")) {
+    try {
+      const baseUrl = process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const parsed = returnUrl.startsWith("http://") || returnUrl.startsWith("https://")
+        ? new URL(returnUrl)
+        : new URL(returnUrl, baseUrl);
+
+      parsed.searchParams.set("email", emailAddress);
+      finalReturnUrl = parsed.pathname + parsed.search + parsed.hash;
+    } catch {
+      // Keep original returnUrl if parsing fails.
+    }
+  }
+
   const session = await createCheckoutSession({
     userId,
-    returnUrl,
+    returnUrl: finalReturnUrl,
     email: emailAddress,
   });
 

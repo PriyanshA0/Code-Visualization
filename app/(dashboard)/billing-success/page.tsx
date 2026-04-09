@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { CheckCircle2, Download } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 interface UserData {
   isPro: boolean;
@@ -12,6 +13,7 @@ interface UserData {
 
 export default function BillingSuccessPage() {
   const { user } = useUser();
+  const searchParams = useSearchParams();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,13 +21,18 @@ export default function BillingSuccessPage() {
   useEffect(() => {
     async function fetchUserData() {
       try {
-        if (!user?.primaryEmailAddress?.emailAddress) {
-          setError("No email found");
+        const emailFromUser = user?.primaryEmailAddress?.emailAddress || user?.emailAddresses?.[0]?.emailAddress;
+        const emailFromQuery = searchParams.get("email") || "";
+        const email = emailFromUser || emailFromQuery;
+
+        if (!email) {
+          setUserData({
+            isPro: false,
+            email: "Not available",
+          });
           setLoading(false);
           return;
         }
-
-        const email = user.primaryEmailAddress.emailAddress;
 
         // Fetch user data from API to check isPro status
         const response = await fetch(`/api/user/status?email=${encodeURIComponent(email)}`);
@@ -48,7 +55,7 @@ export default function BillingSuccessPage() {
     }
 
     fetchUserData();
-  }, [user]);
+  }, [searchParams, user]);
 
   const now = new Date();
   const billDate = now.toLocaleDateString("en-GB");
