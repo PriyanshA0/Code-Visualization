@@ -4,6 +4,7 @@ import { Polar } from "@polar-sh/sdk";
 export interface CheckoutPayload {
   userId: string;
   returnUrl: string;
+  email?: string;
 }
 
 export interface CheckoutResult {
@@ -42,7 +43,7 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<C
       placeholder: true,
       configured: false,
       message:
-        "Polar is not configured. Set POLAR_ACCESS_TOKEN and POLAR_PRODUCT_ID in .env.local.",
+        "Payment processing is not configured. Please contact support.",
     };
   }
 
@@ -59,6 +60,7 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<C
       returnUrl: successUrl,
       metadata: {
         clerkUserId: payload.userId,
+        ...(payload.email ? { email: payload.email } : {}),
       },
     });
 
@@ -68,7 +70,7 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<C
         provider: "polar",
         placeholder: true,
         configured: true,
-        message: "Polar checkout created but no checkout URL was returned.",
+        message: "Unable to process checkout. Please try again later or contact support.",
       };
     }
 
@@ -82,7 +84,7 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<C
     const message =
       error instanceof Error
         ? error.message
-        : "Unable to connect to Polar API. Try again or verify POLAR_API_BASE_URL.";
+        : "Unable to process payment. Please try again or contact support.";
 
     return {
       provider: "polar",

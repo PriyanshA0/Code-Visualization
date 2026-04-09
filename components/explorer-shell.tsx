@@ -309,7 +309,7 @@ export function ExplorerShell() {
                 onClick={handleUpgrade}
                 className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110"
               >
-                Upgrade with Polar
+                Upgrade to Pro
               </button>
               <button
                 onClick={() => setShowUpgradePrompt(false)}
@@ -429,7 +429,7 @@ export function ExplorerShell() {
                   onClick={handleUpgrade}
                   className="mt-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 text-xs font-semibold text-black transition hover:brightness-110"
                 >
-                  Upgrade with Polar
+                  Upgrade to Pro
                 </button>
               </div>
             )}

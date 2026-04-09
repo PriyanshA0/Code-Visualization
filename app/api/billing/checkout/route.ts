@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { createCheckoutSession } from "@/lib/actions/billing/provider";
 
 export async function POST(request: NextRequest) {
-  const { userId } = await auth();
+  const { userId, sessionClaims } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -11,7 +11,14 @@ export async function POST(request: NextRequest) {
   const body = (await request.json().catch(() => ({}))) as { returnUrl?: string };
   const returnUrl = body.returnUrl || "/visualizer";
 
-  const session = await createCheckoutSession({ userId, returnUrl });
+  // Get user email from sessionClaims
+  const emailAddress = (sessionClaims?.email || "") as string;
+
+  const session = await createCheckoutSession({
+    userId,
+    returnUrl,
+    email: emailAddress,
+  });
 
   if (session.checkoutUrl) {
     return NextResponse.json({ ...session }, { status: 200 });

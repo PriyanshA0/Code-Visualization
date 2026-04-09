@@ -89,7 +89,7 @@ const capabilityCards = [
   {
     title: "Quota + Monetization Ready",
     description:
-      "Built-in monthly free quota, upgrade prompt on limit breach, and Polar checkout/webhook hooks for production billing.",
+      "Built-in monthly free quota, upgrade prompt on limit breach, and production-ready payment integration.",
     tag: "SAAS",
     accent: "from-pink-400/35 to-rose-500/20",
   },
@@ -132,7 +132,7 @@ const workflow = [
 const benchmarkRows = [
   { item: "Execution APIs", detail: "POST /api/execute/javascript and /api/execute/python" },
   { item: "Quota Control", detail: "GET /api/usage/quota with monthly free run tracking" },
-  { item: "Billing Integration", detail: "Polar checkout + webhook sync for plan state" },
+  { item: "Billing Integration", detail: "Secure payment processing + subscription management" },
   { item: "Storage Layer", detail: "Mongo models for snippets, usage, and subscriptions" },
   { item: "Route Security", detail: "Auth-protected visualizer and execution/snippet routes" },
   { item: "UI Tooling", detail: "Code editor, flow map, variable state, and execution logs" },
