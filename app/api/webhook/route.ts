@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { WebhookVerificationError, validateEvent } from "@polar-sh/sdk/webhooks";
 import { connectToDB } from "@/lib/mongodb";
 import User from "@/lib/models/User";
+import UserSubscription from "@/lib/models/UserSubscription";
+
+const CREDIT_PACK_SIZE = 10;
 
 type PolarWebhookPayload = {
   type?: string;
@@ -11,9 +14,18 @@ type PolarWebhookPayload = {
     status?: string;
     customer_id?: string;
     customer_email?: string;
-    metadata?: Record<string, any>;
+    metadata?: {
+      clerkUserId?: string;
+      userId?: string;
+      email?: string;
+      [key: string]: any;
+    };
   };
 };
+
+function resolveClerkUserId(payload: PolarWebhookPayload): string | null {
+  return payload.data?.metadata?.clerkUserId || payload.data?.metadata?.userId || null;
+}
 
 /**
  * Log webhook payload for debugging
@@ -31,7 +43,7 @@ function logWebhookPayload(payload: PolarWebhookPayload) {
  * Extract email from webhook payload
  */
 function extractEmail(payload: PolarWebhookPayload): string | null {
-  return payload.data?.customer_email || null;
+  return payload.data?.customer_email || payload.data?.metadata?.email || null;
 }
 
 /**
@@ -149,6 +161,55 @@ export async function POST(request: NextRequest) {
       { new: true, upsert: true }
     ).exec();
 
+    const userId = resolveClerkUserId(body);
+    let subscriptionSynced = false;
+
+    // Also sync quota credits used by the visualizer.
+    if (userId) {
+      const now = new Date();
+      const resetAt = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
+      const eventId = body.id || body.data?.id;
+
+      if (eventId) {
+        const existing = await UserSubscription.findOne(
+          { userId },
+          { lastProcessedPolarEventId: 1 }
+        ).exec();
+
+        if (existing?.lastProcessedPolarEventId === eventId) {
+          subscriptionSynced = true;
+        }
+      }
+
+      if (!subscriptionSynced) {
+        await UserSubscription.updateOne(
+          { userId },
+          {
+            $set: {
+              userId,
+              planType: "pro",
+              isPaid: true,
+              paymentProvider: "polar",
+              providerCustomerId: body.data?.customer_id || body.data?.id,
+              ...(eventId ? { lastProcessedPolarEventId: eventId } : {}),
+              resetAt,
+            },
+            $inc: {
+              paidCreditsTotal: CREDIT_PACK_SIZE,
+              paidCreditsRemaining: CREDIT_PACK_SIZE,
+            },
+            $setOnInsert: {
+              monthlyFreeLimit: 2,
+              monthlyFreeUsed: 0,
+            },
+          },
+          { upsert: true }
+        );
+
+        subscriptionSynced = true;
+      }
+    }
+
     console.log("[Polar Webhook] User upgraded to Pro:", {
       email,
       userId: user._id,
@@ -160,6 +221,8 @@ export async function POST(request: NextRequest) {
         received: true,
         synced: true,
         email,
+        clerkUserId: userId,
+        subscriptionSynced,
         userId: user._id,
         isPro: user.isPro,
       },
