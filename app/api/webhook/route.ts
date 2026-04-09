@@ -121,15 +121,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Extract user email
+    // Resolve identifiers from payload.
     const email = extractEmail(body);
-    if (!email) {
-      console.error("[Polar Webhook] Missing customer_email in payload");
+    const userId = resolveClerkUserId(body);
+
+    // Process if at least one identifier is present.
+    if (!email && !userId) {
+      console.error("[Polar Webhook] Missing both customer_email and clerk user id");
       return NextResponse.json(
         {
           received: true,
           ignored: true,
-          reason: "Missing customer_email",
+          reason: "Missing customer_email and clerkUserId",
         },
         { status: 202 }
       );
@@ -149,19 +152,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user by email and upgrade to Pro
-    const user = await User.findOneAndUpdate(
-      { email: email.toLowerCase() },
-      {
-        $set: {
-          email: email.toLowerCase(),
-          isPro: true,
-        },
-      },
-      { new: true, upsert: true }
-    ).exec();
+    let user = null;
 
-    const userId = resolveClerkUserId(body);
+    // Sync email-based user profile only when email exists.
+    if (email) {
+      user = await User.findOneAndUpdate(
+        { email: email.toLowerCase() },
+        {
+          $set: {
+            email: email.toLowerCase(),
+            isPro: true,
+          },
+        },
+        { new: true, upsert: true }
+      ).exec();
+    }
+
     let subscriptionSynced = false;
 
     // Also sync quota credits used by the visualizer.
@@ -210,21 +216,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log("[Polar Webhook] User upgraded to Pro:", {
-      email,
-      userId: user._id,
-      isPro: user.isPro,
+    console.log("[Polar Webhook] Payment processed:", {
+      email: email || null,
+      clerkUserId: userId || null,
+      userRecordSynced: Boolean(user),
+      subscriptionSynced,
     });
 
     return NextResponse.json(
       {
         received: true,
         synced: true,
-        email,
-        clerkUserId: userId,
+        email: email || null,
+        clerkUserId: userId || null,
         subscriptionSynced,
-        userId: user._id,
-        isPro: user.isPro,
+        userId: user?._id || null,
+        isPro: user?.isPro || Boolean(subscriptionSynced),
       },
       { status: 200 }
     );
