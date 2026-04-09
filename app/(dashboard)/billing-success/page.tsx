@@ -114,7 +114,7 @@ export default function BillingSuccessPage() {
               {/* Customer Email */}
               <div className="flex justify-between">
                 <span className="text-sm text-slate-600">Customer Email:</span>
-                <span className="text-sm font-semibold text-slate-900">{userData.email}</span>
+                <span className="text-sm font-semibold text-slate-900">{userData?.email}</span>
               </div>
 
               {/* Customer Name */}
@@ -195,7 +195,7 @@ export default function BillingSuccessPage() {
               {/* Customer Email */}
               <div className="flex justify-between">
                 <span className="text-sm text-slate-600">Customer Email:</span>
-                <span className="text-sm font-semibold text-slate-900">{userData.email}</span>
+                <span className="text-sm font-semibold text-slate-900">{userData?.email}</span>
               </div>
 
               {/* Customer Name */}
