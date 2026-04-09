@@ -250,6 +250,7 @@ export function ExplorerShell() {
     try {
       const response = await fetch("/api/billing/checkout", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ returnUrl: "/billing-success" }),
       });

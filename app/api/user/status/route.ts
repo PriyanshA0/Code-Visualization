@@ -24,16 +24,28 @@ export async function GET(request: NextRequest) {
     }
 
     // Find user by email
+    const normalizedEmail = email.toLowerCase();
     const user = await User.findOne({
-      email: email.toLowerCase(),
+      email: normalizedEmail,
     }).exec();
 
     if (!user) {
+      await User.updateOne(
+        { email: normalizedEmail },
+        {
+          $setOnInsert: {
+            email: normalizedEmail,
+            isPro: false,
+          },
+        },
+        { upsert: true }
+      );
+
       // Return default response if user not found
       return NextResponse.json(
         {
           isPro: false,
-          email: email.toLowerCase(),
+          email: normalizedEmail,
           found: false,
         },
         { status: 200 }
