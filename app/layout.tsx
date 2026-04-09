@@ -19,10 +19,10 @@ const siteUrl = getSiteUrl();
 const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export const metadata: Metadata = {
-  title: "talksy.code.visualizer",
+  title: "TalkSy-Code-Visualizer",
   description: "Step-by-step code execution visualization platform",
   metadataBase: new URL(siteUrl),
-  applicationName: "talksy.code.visualizer",
+  applicationName: "TalkSy-Code-Visualizer",
   keywords: [
     "code visualization",
     "programming visualizer",
@@ -44,10 +44,10 @@ export const metadata: Metadata = {
     apple: "/pokemon/pikachu.png?v=3",
   },
   openGraph: {
-    title: "talksy.code.visualizer",
+    title: "TalkSy-Code-Visualizer",
     description: "Step-by-step code execution visualization platform",
     url: `${siteUrl}/`,
-    siteName: "talksy.code.visualizer",
+    siteName: "TalkSy-Code-Visualizer",
     type: "website",
     images: [
       {
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "talksy.code.visualizer",
+    title: "TalkSy-Code-Visualizer",
     description: "Step-by-step code execution visualization platform",
     images: ["/pokemon/battle.png"],
   },
