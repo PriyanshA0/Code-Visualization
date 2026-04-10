@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { connectToDB } from "@/lib/mongodb";
 import User from "@/lib/models/User";
+import UserSubscription from "@/lib/models/UserSubscription";
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const email = searchParams.get("email");
+    const { userId } = await auth();
+    const clerkUser = userId ? await currentUser() : null;
 
-    if (!email) {
+    const searchParams = request.nextUrl.searchParams;
+    const emailParam = searchParams.get("email");
+    const emailFromClerk = clerkUser?.emailAddresses?.[0]?.emailAddress || null;
+    const normalizedEmail = (emailFromClerk || emailParam || "").toLowerCase() || null;
+
+    if (!userId && !normalizedEmail) {
       return NextResponse.json(
-        { error: "Email parameter is required" },
+        { error: "A signed-in user or email parameter is required" },
         { status: 400 }
       );
     }
@@ -23,30 +30,50 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find user by email
-    const normalizedEmail = email.toLowerCase();
-    const user = await User.findOne({
-      email: normalizedEmail,
-    }).exec();
+    const userQuery = {
+      $or: [
+        ...(userId ? [{ clerkId: userId }] : []),
+        ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
+      ],
+    };
 
-    if (!user) {
-      await User.updateOne(
-        { email: normalizedEmail },
+    let user = await User.findOne(userQuery).exec();
+
+    if (!user && userId && normalizedEmail) {
+      user = await User.findOneAndUpdate(
+        userQuery,
         {
-          $setOnInsert: {
+          $set: {
+            clerkId: userId,
             email: normalizedEmail,
+          },
+          $setOnInsert: {
             isPro: false,
           },
         },
-        { upsert: true }
-      );
+        { new: true, upsert: true }
+      ).exec();
+    }
 
-      // Return default response if user not found
+    const subscription = userId
+      ? await UserSubscription.findOne({ userId }, { planType: 1, isPaid: 1, paidCreditsRemaining: 1 }).exec()
+      : null;
+
+    const isProFromSubscription = Boolean(
+      subscription &&
+      (subscription.isPaid || subscription.planType === "pro" || subscription.paidCreditsRemaining > 0)
+    );
+
+    const isPro = Boolean(user?.isPro || isProFromSubscription);
+
+    if (!user) {
       return NextResponse.json(
         {
-          isPro: false,
+          isPro,
           email: normalizedEmail,
+          clerkId: userId || null,
           found: false,
+          source: isProFromSubscription ? "subscription" : "none",
         },
         { status: 200 }
       );
@@ -54,9 +81,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       {
-        isPro: user.isPro,
+        isPro,
         email: user.email,
+        clerkId: user.clerkId || userId || null,
         found: true,
+        source: user.isPro ? "user" : isProFromSubscription ? "subscription" : "user",
       },
       { status: 200 }
     );

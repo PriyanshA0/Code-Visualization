@@ -27,22 +27,15 @@ export async function POST() {
 
     if (email) {
       await User.updateOne(
-        { email },
+        {
+          $or: [{ clerkId: userId }, { email }],
+        },
         {
           $set: {
             email,
             clerkId: userId,
-            isPro: false,
           },
-        },
-        { upsert: true }
-      );
-    } else {
-      await User.updateOne(
-        { clerkId: userId },
-        {
-          $set: {
-            clerkId: userId,
+          $setOnInsert: {
             isPro: false,
           },
         },
@@ -72,6 +65,7 @@ export async function POST() {
         connected: true,
         userId,
         email,
+        userSynced: Boolean(email),
         bootstrapped: true,
       },
       { status: 200 }

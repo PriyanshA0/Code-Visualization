@@ -154,17 +154,25 @@ export async function POST(request: NextRequest) {
 
     let user = null;
 
-    // Sync email-based user profile only when email exists.
-    if (email) {
+    // Sync user profile keyed by Clerk identity and/or email.
+    const normalizedEmail = email?.toLowerCase() || null;
+    const userFilters = [
+      ...(userId ? [{ clerkId: userId }] : []),
+      ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
+    ];
+
+    if (userFilters.length > 0) {
+      const userQuery = userFilters.length === 1 ? userFilters[0] : { $or: userFilters };
       user = await User.findOneAndUpdate(
-        { email: email.toLowerCase() },
+        userQuery,
         {
           $set: {
-            email: email.toLowerCase(),
+            ...(normalizedEmail ? { email: normalizedEmail } : {}),
+            ...(userId ? { clerkId: userId } : {}),
             isPro: true,
           },
         },
-        { new: true, upsert: true }
+        { new: true, upsert: Boolean(normalizedEmail) }
       ).exec();
     }
 

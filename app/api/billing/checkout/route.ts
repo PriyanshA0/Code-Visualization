@@ -23,11 +23,15 @@ export async function POST(request: NextRequest) {
     if (connection) {
       if (emailAddress) {
         await User.updateOne(
-          { email: emailAddress.toLowerCase() },
+          {
+            $or: [{ clerkId: userId }, { email: emailAddress.toLowerCase() }],
+          },
           {
             $set: {
               email: emailAddress.toLowerCase(),
               clerkId: userId,
+            },
+            $setOnInsert: {
               isPro: false,
             },
           },

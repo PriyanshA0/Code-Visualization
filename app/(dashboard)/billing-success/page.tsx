@@ -39,10 +39,17 @@ export default function BillingSuccessPage() {
           credentials: "include",
         });
 
-        // Fetch user data from API to check isPro status
-        const response = await fetch(`/api/user/status?email=${encodeURIComponent(email)}`, {
+        // Fetch user data from API to check plan status using signed-in identity.
+        let response = await fetch("/api/user/status", {
           credentials: "include",
         });
+
+        // Fallback for scenarios where auth context is not yet available.
+        if (!response.ok && email) {
+          response = await fetch(`/api/user/status?email=${encodeURIComponent(email)}`, {
+            credentials: "include",
+          });
+        }
 
         if (!response.ok) {
           setUserData({
