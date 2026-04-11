@@ -22,6 +22,16 @@ function getPythonLaunchCandidates(): PythonLaunchCandidate[] {
   ];
 }
 
+function filterPythonTraceObject(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).filter(([key]) => !key.startsWith("__"))
+  );
+}
+
 function normalizeStep(step: any): ExecutionStep {
   return {
   description:
@@ -31,7 +41,7 @@ function normalizeStep(step: any): ExecutionStep {
   line: Number(step?.line) || 0,
   variables:
     step?.variables && typeof step.variables === "object"
-    ? (step.variables as Record<string, unknown>)
+    ? filterPythonTraceObject(step.variables)
     : {},
   callStack: Array.isArray(step?.callStack)
     ? step.callStack.map((frame: any): CallFrameInfo => ({
@@ -41,11 +51,11 @@ function normalizeStep(step: any): ExecutionStep {
         : "<module>",
       parameters:
       frame?.parameters && typeof frame.parameters === "object"
-        ? (frame.parameters as Record<string, unknown>)
+        ? filterPythonTraceObject(frame.parameters)
         : {},
       localVariables:
       frame?.localVariables && typeof frame.localVariables === "object"
-        ? (frame.localVariables as Record<string, unknown>)
+        ? filterPythonTraceObject(frame.localVariables)
         : {},
     }))
     : [],

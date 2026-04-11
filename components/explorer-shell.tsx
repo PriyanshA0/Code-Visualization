@@ -102,6 +102,32 @@ interface QuotaView {
   resetAt: string;
 }
 
+function isRenderableArray(value: unknown): boolean {
+  return Array.isArray(value) && value.length > 0 && (value as unknown[]).every((item) =>
+    typeof item === "number" || typeof item === "string" || typeof item === "boolean" || item === null
+  );
+}
+
+function findInitialStepIndex(
+  trace: ExecutionTrace,
+  language: "javascript" | "python" | "java" | "cpp"
+): number {
+  if (language !== "python") {
+    return 0;
+  }
+
+  const arrayStepIndex = trace.steps.findIndex((step) =>
+    Object.values(step.variables).some((value) => isRenderableArray(value))
+  );
+
+  if (arrayStepIndex >= 0) {
+    return arrayStepIndex;
+  }
+
+  const firstVisibleStepIndex = trace.steps.findIndex((step) => Object.keys(step.variables).length > 0);
+  return firstVisibleStepIndex >= 0 ? firstVisibleStepIndex : 0;
+}
+
 function deriveEditorTitle(
   code: string,
   language: "javascript" | "python" | "java" | "cpp"
@@ -319,7 +345,7 @@ export function ExplorerShell() {
       setQuota(trace?.quota ?? null);
 
       setExecutionTrace(trace);
-      setCurrentStep(0);
+      setCurrentStep(findInitialStepIndex(trace, language));
     } catch (error) {
       setExecutionTrace({
         steps: [],
