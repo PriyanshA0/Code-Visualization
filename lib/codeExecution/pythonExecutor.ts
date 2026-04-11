@@ -3,6 +3,25 @@ import { CallFrameInfo, ExecutionStep, ExecutionTrace } from "./types";
 
 const TRACE_MARKER = "__TALKSY_TRACE__";
 
+type PythonLaunchCandidate = {
+  command: string;
+  args: string[];
+  label: string;
+};
+
+function getPythonLaunchCandidates(): PythonLaunchCandidate[] {
+  const customCommand = process.env.PYTHON_COMMAND?.trim();
+  if (customCommand) {
+    return [{ command: customCommand, args: ["-u"], label: customCommand }];
+  }
+
+  return [
+    { command: "python", args: ["-u"], label: "python" },
+    { command: "python3", args: ["-u"], label: "python3" },
+    { command: "py", args: ["-3", "-u"], label: "py -3" },
+  ];
+}
+
 function normalizeStep(step: any): ExecutionStep {
   return {
   description:
@@ -156,100 +175,138 @@ export async function executePython(
   timeout: number = 5000
 ): Promise<ExecutionTrace> {
   const startTime = Date.now();
+  const tracedScript = buildTracedPythonScript(code);
+  const candidates = getPythonLaunchCandidates();
 
   return new Promise((resolve) => {
-    const python = spawn("python", ["-u"], { timeout });
-    const tracedScript = buildTracedPythonScript(code);
-
-    let output = "";
-    let errorOutput = "";
-    let hasTimedOut = false;
-
-    const timeoutTimer = setTimeout(() => {
-      hasTimedOut = true;
-      python.kill();
-    }, timeout);
-
-    python.stdout?.on("data", (data) => {
-      output += data.toString();
-    });
-
-    python.stderr?.on("data", (data) => {
-      errorOutput += data.toString();
-    });
-
-    python.on("error", (error) => {
-      clearTimeout(timeoutTimer);
-      const executionTime = Date.now() - startTime;
-      resolve({
-        steps: [],
-        output,
-        errors: error instanceof Error ? error.message : "Failed to start Python process",
-        totalSteps: 0,
-        executionTime,
-      });
-    });
-
-    python.on("close", (exitCode: number) => {
-      clearTimeout(timeoutTimer);
-      const executionTime = Date.now() - startTime;
-
-      if (hasTimedOut) {
+    const tryRunCandidate = (index: number) => {
+      if (index >= candidates.length) {
+        const executionTime = Date.now() - startTime;
         resolve({
           steps: [],
-          output,
-          errors: `Execution timeout after ${timeout}ms`,
+          output: "",
+          errors:
+            "Python runtime not found. Install Python and add it to PATH, or set PYTHON_COMMAND in environment variables.",
           totalSteps: 0,
           executionTime,
         });
         return;
       }
 
-      const markerIndex = output.lastIndexOf(TRACE_MARKER);
-      let renderedOutput = output;
-      let parsedSteps: ExecutionStep[] = [];
-      let traceError: string | null = null;
+      const candidate = candidates[index];
+      const python = spawn(candidate.command, candidate.args, { timeout });
 
-      if (markerIndex >= 0) {
-        renderedOutput = output.slice(0, markerIndex).replace(/\s+$/, "");
-        const payloadRaw = output.slice(markerIndex + TRACE_MARKER.length).trim();
+      let output = "";
+      let errorOutput = "";
+      let hasTimedOut = false;
+      let attemptHandled = false;
 
-        try {
-          const payload = JSON.parse(payloadRaw) as {
-            steps?: any[];
-            error?: string | null;
-          };
-          parsedSteps = Array.isArray(payload.steps)
-            ? payload.steps.map((step) => normalizeStep(step))
-            : [];
-          traceError = typeof payload.error === "string" && payload.error.length > 0 ? payload.error : null;
-        } catch {
-          traceError = "Failed to parse Python execution trace payload";
+      const timeoutTimer = setTimeout(() => {
+        hasTimedOut = true;
+        python.kill();
+      }, timeout);
+
+      python.stdout?.on("data", (data) => {
+        output += data.toString();
+      });
+
+      python.stderr?.on("data", (data) => {
+        errorOutput += data.toString();
+      });
+
+      python.on("error", (error: NodeJS.ErrnoException) => {
+        if (attemptHandled) {
+          return;
         }
-      }
+        attemptHandled = true;
+        clearTimeout(timeoutTimer);
 
-      if (exitCode !== 0 || traceError || errorOutput) {
+        if (error.code === "ENOENT") {
+          tryRunCandidate(index + 1);
+          return;
+        }
+
+        const executionTime = Date.now() - startTime;
+        resolve({
+          steps: [],
+          output,
+          errors:
+            error instanceof Error
+              ? `Failed to start Python process (${candidate.label}): ${error.message}`
+              : `Failed to start Python process (${candidate.label})`,
+          totalSteps: 0,
+          executionTime,
+        });
+      });
+
+      python.on("close", (exitCode: number) => {
+        if (attemptHandled) {
+          return;
+        }
+        attemptHandled = true;
+
+        clearTimeout(timeoutTimer);
+        const executionTime = Date.now() - startTime;
+
+        if (hasTimedOut) {
+          resolve({
+            steps: [],
+            output,
+            errors: `Execution timeout after ${timeout}ms`,
+            totalSteps: 0,
+            executionTime,
+          });
+          return;
+        }
+
+        const markerIndex = output.lastIndexOf(TRACE_MARKER);
+        let renderedOutput = output;
+        let parsedSteps: ExecutionStep[] = [];
+        let traceError: string | null = null;
+
+        if (markerIndex >= 0) {
+          renderedOutput = output.slice(0, markerIndex).replace(/\s+$/, "");
+          const payloadRaw = output.slice(markerIndex + TRACE_MARKER.length).trim();
+
+          try {
+            const payload = JSON.parse(payloadRaw) as {
+              steps?: any[];
+              error?: string | null;
+            };
+            parsedSteps = Array.isArray(payload.steps)
+              ? payload.steps.map((step) => normalizeStep(step))
+              : [];
+            traceError = typeof payload.error === "string" && payload.error.length > 0 ? payload.error : null;
+          } catch {
+            traceError = "Failed to parse Python execution trace payload";
+          }
+        }
+
+        if (exitCode !== 0 || traceError || errorOutput) {
+          resolve({
+            steps: parsedSteps,
+            output: renderedOutput,
+            errors: traceError || errorOutput || `Python process exited with code ${exitCode}`,
+            totalSteps: parsedSteps.length,
+            executionTime,
+          });
+          return;
+        }
+
         resolve({
           steps: parsedSteps,
           output: renderedOutput,
-          errors: traceError || errorOutput || `Python process exited with code ${exitCode}`,
+          errors: null,
           totalSteps: parsedSteps.length,
           executionTime,
         });
-        return;
-      }
-
-      resolve({
-        steps: parsedSteps,
-        output: renderedOutput,
-        errors: null,
-        totalSteps: parsedSteps.length,
-        executionTime,
       });
-    });
 
-    // Run traced wrapper that executes user code and emits structured trace.
-    python.stdin?.write(tracedScript);
-    python.stdin?.end();
+      // Run traced wrapper that executes user code and emits structured trace.
+      python.stdin?.write(tracedScript);
+      python.stdin?.end();
+    };
+
+    tryRunCandidate(0);
   });
 }
