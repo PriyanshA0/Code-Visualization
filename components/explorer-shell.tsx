@@ -147,11 +147,11 @@ function deriveEditorTitle(
 }
 
 export function ExplorerShell() {
-  const [language, setLanguage] = useState<"javascript" | "python" | "java" | "cpp">("javascript");
+  const [language, setLanguage] = useState<"javascript" | "python" | "java" | "cpp">("python");
   const [executionTrace, setExecutionTrace] = useState<ExecutionTrace | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const [code, setCode] = useState(initialJavaScript);
+  const [code, setCode] = useState(initialPython);
   const [mode, setMode] = useState<"step" | "auto">("step");
   const [speed, setSpeed] = useState(1.5);
   const [quota, setQuota] = useState<QuotaView | null>(null);
