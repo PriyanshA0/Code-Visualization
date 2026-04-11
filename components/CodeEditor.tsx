@@ -13,8 +13,8 @@ const Editor = dynamic(() => import("@monaco-editor/react"), {
 });
 
 interface CodeEditorProps {
-  language: "javascript" | "python";
-  onLanguageChange: (language: "javascript" | "python") => void;
+  language: "javascript" | "python" | "java" | "cpp";
+  onLanguageChange: (language: "javascript" | "python" | "java" | "cpp") => void;
   onRun: (code: string) => void;
   value: string;
   onChange: (code: string) => void;
@@ -61,6 +61,22 @@ export default function CodeEditor({
             PY
           </button>
           <button
+            onClick={() => onLanguageChange("java")}
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+              language === "java" ? "bg-orange-400/20 text-orange-100" : "bg-white/0 text-slate-400 hover:bg-white/5"
+            }`}
+          >
+            JAVA
+          </button>
+          <button
+            onClick={() => onLanguageChange("cpp")}
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+              language === "cpp" ? "bg-emerald-400/20 text-emerald-100" : "bg-white/0 text-slate-400 hover:bg-white/5"
+            }`}
+          >
+            C++
+          </button>
+          <button
             onClick={handleRun}
             disabled={isRunning}
             className="ml-2 rounded-lg bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-1.5 text-xs font-semibold text-[#04121f] shadow-lg shadow-emerald-500/25 transition hover:brightness-110 disabled:opacity-50"
@@ -73,7 +89,15 @@ export default function CodeEditor({
       <div className="min-h-0 flex-1 overflow-hidden">
         <Editor
           height="100%"
-          language={language === "javascript" ? "javascript" : "python"}
+          language={
+            language === "javascript"
+              ? "javascript"
+              : language === "python"
+              ? "python"
+              : language === "java"
+              ? "java"
+              : "cpp"
+          }
           value={value}
           onChange={(nextCode) => onChange(nextCode || "")}
           theme="vs-dark"

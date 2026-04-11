@@ -7,6 +7,7 @@ import ObjectMotionPanel from "./visualizers/ObjectMotionPanel";
 
 interface VisualizerProps {
   code: string;
+  language: "javascript" | "python" | "java" | "cpp";
   executionTrace: ExecutionTrace | null;
   currentStepIndex: number;
   speed: number;
@@ -70,6 +71,7 @@ function StepControlRow({
 
 export default function Visualizer({
   code,
+  language,
   executionTrace,
   currentStepIndex,
   speed,
@@ -144,10 +146,17 @@ export default function Visualizer({
   }, [currentLineNumber]);
 
   const totalSteps = executionTrace?.totalSteps ?? 0;
+  const isCompiledLanguage = language === "java" || language === "cpp";
+  const hasNoTrace = Boolean(executionTrace) && totalSteps === 0;
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto rounded-[24px] border border-white/8 bg-[#141a2a] p-4 shadow-[0_16px_70px_rgba(0,0,0,0.35)]">
       <div className="rounded-2xl border border-white/6 bg-[#0b1020] p-3 sm:p-4">
+        {hasNoTrace && isCompiledLanguage && (
+          <div className="mb-3 rounded-xl border border-amber-300/25 bg-amber-400/10 px-3 py-2 text-xs text-amber-100">
+            Line-by-line variable tracing is not available for {language.toUpperCase()} yet. You can still run code and inspect output/errors.
+          </div>
+        )}
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-[0.2em] text-slate-400 sm:tracking-[0.3em]">
           <span>Live Visualization</span>
           <div className="flex items-center gap-2 text-[11px] tracking-[0.14em] text-slate-500 sm:gap-3 sm:tracking-[0.2em]">

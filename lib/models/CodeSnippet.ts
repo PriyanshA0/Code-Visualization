@@ -4,7 +4,7 @@ export interface ICodeSnippet extends Document {
   userId: string;
   title: string;
   code: string;
-  language: "javascript" | "python" | "java";
+  language: "javascript" | "python" | "java" | "cpp";
   description?: string;
   isPublic: boolean;
   createdAt: Date;
@@ -28,7 +28,7 @@ const CodeSnippetSchema = new Schema<ICodeSnippet>(
     },
     language: {
       type: String,
-      enum: ["javascript", "python", "java"],
+      enum: ["javascript", "python", "java", "cpp"],
       required: true,
     },
     description: {

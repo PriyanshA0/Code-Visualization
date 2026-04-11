@@ -24,6 +24,6 @@ export interface ExecutionTrace {
 
 export interface CodeExecutionRequest {
   code: string;
-  language: "javascript" | "python" | "java";
+  language: "javascript" | "python" | "java" | "cpp";
   timeout?: number; // milliseconds, default 5000
 }

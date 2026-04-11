@@ -11,7 +11,7 @@ export interface ExecutionStep {
 export interface IExecutionLog extends Document {
   snippetId?: Types.ObjectId;
   userId: string;
-  language: "javascript" | "python" | "java";
+  language: "javascript" | "python" | "java" | "cpp";
   code: string;
   executionTrace: ExecutionStep[];
   totalSteps: number;
@@ -34,7 +34,7 @@ const ExecutionLogSchema = new Schema<IExecutionLog>(
     },
     language: {
       type: String,
-      enum: ["javascript", "python", "java"],
+      enum: ["javascript", "python", "java", "cpp"],
       required: true,
     },
     code: {

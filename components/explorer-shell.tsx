@@ -38,6 +38,59 @@ const initialPython = `def bubble_sort(arr):
 data = [12, 24, 68, 42, 88, 15, 33, 57]
 print(bubble_sort(data))`;
 
+const initialJava = `import java.util.Arrays;
+
+public class Main {
+  static int[] bubbleSort(int[] arr) {
+    int n = arr.length;
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n - i - 1; j++) {
+        if (arr[j] > arr[j + 1]) {
+          int temp = arr[j];
+          arr[j] = arr[j + 1];
+          arr[j + 1] = temp;
+        }
+      }
+    }
+    return arr;
+  }
+
+  public static void main(String[] args) {
+    int[] data = {12, 24, 68, 42, 88, 15, 33, 57};
+    System.out.println(Arrays.toString(bubbleSort(data)));
+  }
+}`;
+
+const initialCpp = `#include <iostream>
+#include <vector>
+
+using namespace std;
+
+vector<int> bubbleSort(vector<int> arr) {
+  int n = static_cast<int>(arr.size());
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n - i - 1; j++) {
+      if (arr[j] > arr[j + 1]) {
+        int temp = arr[j];
+        arr[j] = arr[j + 1];
+        arr[j + 1] = temp;
+      }
+    }
+  }
+  return arr;
+}
+
+int main() {
+  vector<int> data = {12, 24, 68, 42, 88, 15, 33, 57};
+  vector<int> sorted = bubbleSort(data);
+
+  for (size_t i = 0; i < sorted.size(); i++) {
+    cout << sorted[i] << (i + 1 < sorted.size() ? " " : "\n");
+  }
+
+  return 0;
+}`;
+
 interface QuotaView {
   planType: "free" | "pro";
   quotaMode: "free" | "paid";
@@ -49,7 +102,10 @@ interface QuotaView {
   resetAt: string;
 }
 
-function deriveEditorTitle(code: string, language: "javascript" | "python") {
+function deriveEditorTitle(
+  code: string,
+  language: "javascript" | "python" | "java" | "cpp"
+) {
   const lines = code.split("\n").map((line) => line.trim()).filter(Boolean);
   const firstLine = lines[0] ?? "";
 
@@ -61,6 +117,18 @@ function deriveEditorTitle(code: string, language: "javascript" | "python") {
     if (classMatch) return `${classMatch[1].toUpperCase()}.PY`;
 
     return "UNTITLED.PY";
+  }
+
+  if (language === "java") {
+    const classMatch = code.match(/^\s*public\s+class\s+([A-Za-z_][\w]*)/m);
+    if (classMatch) return `${classMatch[1].toUpperCase()}.JAVA`;
+    return "MAIN.JAVA";
+  }
+
+  if (language === "cpp") {
+    const fnMatch = code.match(/^[\w:<>,\s*&]+\s+([A-Za-z_][\w]*)\s*\([^)]*\)\s*\{/m);
+    if (fnMatch) return `${fnMatch[1].toUpperCase()}.CPP`;
+    return "MAIN.CPP";
   }
 
   const fnMatch = code.match(/(?:function|const|let|var)\s+([A-Za-z_][\w]*)\s*(?:=\s*function\s*|=\s*\([^)]*\)\s*=>|\()/m);
@@ -79,7 +147,7 @@ function deriveEditorTitle(code: string, language: "javascript" | "python") {
 }
 
 export function ExplorerShell() {
-  const [language, setLanguage] = useState<"javascript" | "python">("javascript");
+  const [language, setLanguage] = useState<"javascript" | "python" | "java" | "cpp">("javascript");
   const [executionTrace, setExecutionTrace] = useState<ExecutionTrace | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -95,6 +163,8 @@ export function ExplorerShell() {
   const starterCodeByLanguage: Record<typeof language, string> = {
     javascript: initialJavaScript,
     python: initialPython,
+    java: initialJava,
+    cpp: initialCpp,
   };
 
   useEffect(() => {
@@ -197,7 +267,11 @@ export function ExplorerShell() {
       const endpoint =
         language === "javascript"
           ? "/api/execute/javascript"
-          : "/api/execute/python";
+          : language === "python"
+          ? "/api/execute/python"
+          : language === "java"
+          ? "/api/execute/java"
+          : "/api/execute/cpp";
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -311,6 +385,9 @@ export function ExplorerShell() {
             <p className="mt-3 text-sm leading-6 text-yellow-100/80">
               {paywallMessage || "You have no attempts left. Buy 10 more credits to continue."}
             </p>
+            <p className="mt-2 rounded-lg border border-emerald-300/30 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-200">
+              Message: Get 50% discount with code FREE24.
+            </p>
             {quota && (
               <p className="mt-3 text-sm text-yellow-50/90">
                 {quota.quotaMode === "paid"
@@ -381,6 +458,7 @@ export function ExplorerShell() {
           <div className="pokemon-panel min-h-0 rounded-[24px] p-3 sm:rounded-[28px] sm:p-4">
             <Visualizer
               code={code}
+              language={language}
               executionTrace={executionTrace}
               currentStepIndex={currentStep}
               speed={speed}
@@ -439,6 +517,9 @@ export function ExplorerShell() {
               <div className="pokemon-panel rounded-2xl p-4 text-sm text-yellow-50">
                 <p className="font-semibold">Upgrade required</p>
                 <p className="mt-1 leading-6">{paywallMessage}</p>
+                <p className="mt-2 rounded-lg border border-emerald-300/30 bg-emerald-500/10 px-3 py-2 font-medium text-emerald-200">
+                  Message: Get 50% discount with code FREE24.
+                </p>
                 <button
                   onClick={handleUpgrade}
                   className="mt-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 text-xs font-semibold text-black transition hover:brightness-110"
@@ -472,7 +553,6 @@ export function ExplorerShell() {
               code={code}
               language={language}
               onLoadSnippet={(snippet) => {
-                if (snippet.language === "java") return;
                 setCode(snippet.code);
                 setLanguage(snippet.language);
                 setCurrentStep(0);
